@@ -1,0 +1,109 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+
+
+    Factory >> Metodi che gestiscono internamente le new, per limitare gli errori degli utenti.
+
+    NO >>>     LocalDate xmas = new LocalDate(2020, 12, 25);
+      
+    SI >>>     LocalDate xmas = LocalDate.of(2020, 12, 25);
+    SI >>>     Month m = Month.of(10); 			           //  OCTOBER
+    SI >>>     DayOfWeek d = DayOfWeek.of(1); 		           //  MONDAY
+    SI >>>     LocalTime noon = LocalTime.of(12, 0);               //  Mezzogiorno locale
+    SI >>>     LocalTime now = LocalTime.now();                    //  Orario attuale
+    SI >>>     LocalDateTime.of(xmas, noon);			   //  Mezzogiorno locale di natale
+
+
+
+
+>> CLASSI DI ORARI RELATIVI (Valgono per una piccola parte del mondo) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+   - LocalDate: una data relativa (giorno/mese/anno)                       // 2017-12-03
+	- getDayOfYear();
+	- getDayOfMonth();
+	- getDayOfWeek();
+	- getMonth();
+	- getYear();
+	- isLeapYear();
+
+   - LocalTime: un orario relativo (ore/minuti/secondi)                    // 10:15:30
+	- getHour();
+	- getMinute();
+	- getSecond();
+        - getNano();
+
+   - LocalDateTime: unione dei due ,una data + orario relativi             // 2017-12-03T10:15:30
+        - LocalDateTime.of( 2023, 2, 20, 9, 0);   
+
+   - Period: una durata relativa (misurata in giorni, mesi, anni, etc.)
+	- .ofMonths(2)   .ofYears(3) ...
+	- .between(LocalDate, LocalDate)
+
+        - (LocalDate)periodo.addTo(*LocalDate*)
+	- (LocalDate)periodo.subtractFrom(*LocalDate*)
+
+
+
+
+
+>> CLASSI DI ORARI ASSOLUTI (Considerano fuso orario, valgono d'ovunque tu li legga) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    - Instant: un punto sulla linea del tempo espresso in nanosecondi      // 2019-02-13T17:06:14.654704200Z
+        - *qualcosaltro*.toInstant();    
+
+    - Duration: una durata in (nano)secondi fra due istanti di tempo
+	- .ofMonths(2)   .ofYears(3) ...
+	- .between(Instant, Instant);    
+	- toDays(), toHours(), toMinutes()         // Estrae nuumero TOTALE CALCOLATO di...
+
+    APPROCCIO FLUENT INTERFACE (Compongo più factory insieme)
+	Duration dx = Duration.ofDays(1).plusHours(3).minusMinutes(4).minusSeconds(10);	
+
+
+    - OffsetDateTime: una data assoluta sulla linea del tempo              // 2017-12-03T10:15:30+01:00
+         espressa come data + orario + delta rispetto a Greenwich (UTC)
+        
+            - OffsetDateTime.of(LocalDateTime.of(2023,2,20,9,0), ZoneOffset.ofHours(1));    // ZoneOffset esprime la differenza secondo Greenwitch
+	    - OffsetDateTime.of(2017, 10, 7, 20, 30, 10, 0, ZoneOffset.ofHours(1));
+	    - *qualcosaltro*.toOffsetDateTime();
+
+    - ZonedDateTime: una data assoluta sulla linea del tempo               // 2017-12-03T10:15:30+01:00 Europe/Rome
+         espressa come data + orario + fuso orario (es. CET, GMT-5, ecc.)
+            
+            - ZonedDateTime.of(LocalDateTime.of(2023,2,20,9,0), ZoneId.of("CET"));         // ZoneId esprime il fuso orario in cui mi trovo
+	    - ZonedDateTime.of(2017, Month.OCTOBER.getValue(), 7, 20, 30, 10, 0, ZoneId.of("CET"));
+	    - *qualcosaltro*.toZonedDateTime();
+
+
+
+
+>> ENUMERATIVI  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    – DayOfWeek   (Valori leciti: MONDAY, TUESDAY, … SUNDAY)
+    – Month       (Valori leciti: JANUARY, FEBRUARY,… DECEMBER)
+
+    Hanno una factory Indice>>Istanza comoda
+    esempio->->-  Month.of(10)  // October
+
+
+
+>> ARITMETICA DELLE DATE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    - Somma >> metodi plus        --->   plusHours, plusMinutes, plusDays, plusMonths, plusWeeks, plusYears ...
+    - Sottrarre >> met. minus     --->   minusHours, minusMinutes, minusDays, minusMonths, minusWeeks, minusYears ...
+    - Set >> metodi with          --->   withHours, withMinutes, withDayOfMonth, withDayOfYear, withMonth, withYear ...
+
+
+
+
+
+
+
+
+
+
+

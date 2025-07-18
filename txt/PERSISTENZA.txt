@@ -1,0 +1,345 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+
+-------------------------------------------------------PERSISTENZA-----------------------------------------------------
+
+
+CASO CON SPLIT (CONTROLLO SU FORMATTATORI E TIPO):
+
+public Carriera leggiCarriera(Reader rdr) throws IOException {
+		
+		if (rdr==null) throw new IllegalArgumentException("reader is null");
+		BufferedReader reader = new BufferedReader(rdr);
+		Carriera carriera = new Carriera();
+		
+		String line;
+		while((line = reader.readLine())!=null) {
+			if (line.isBlank()) continue; // skip blank lines
+			
+			String[] items = line.split("\\t+");
+			// ci sono sempre 3 o 5 elementi
+			if (items.length!=3 && items.length!=5) throw new BadFileFormatException("Riga mal formattata, non ha 3 o 5 elementi:\t" + line);
+
+			// i primi tre elementi ci sono sempre e vanno comunque verificati
+			String idAsString	= items[0].trim().toUpperCase();
+			String nome 		= items[1].trim().toUpperCase();
+			String cfuAsString	= items[2].trim().toUpperCase();
+
+			// conversioni di tipo: id
+			long id;
+			try {
+				id = Long.parseLong(idAsString);
+			}
+			catch(IllegalArgumentException e) {
+				throw new BadFileFormatException("Codice illegale, non è un long:\t" + line);				
+			}
+			if (id<1) throw new BadFileFormatException("Codice illegale, deve essere positivo:\t" + line);
+
+			// conversioni di tipo: cfu
+			NumberFormat numberFormatter = NumberFormat.getInstance(Locale.ITALY);
+			ParsePosition pos = new ParsePosition(0);
+			Number cfuNum = numberFormatter.parse(cfuAsString.replace('.',' '), pos);
+			if (cfuNum==null || pos.getIndex()<cfuAsString.length() || cfuNum.doubleValue()<1.0)
+				throw new BadFileFormatException("Valore crediti mal formattato o illegale: " + line);
+			double cfu = cfuNum.doubleValue();
+			
+			if (items.length==3) continue; // interessano solo gli esami sostenuti
+			// da qui in poi ci sono sempre tutti e cinque gli elementi
+	
+			String dataAsString	= items[3].trim().toUpperCase();
+			String votoAsString	= items[4].trim().toUpperCase();
+			
+			// conversioni di tipo: data
+			DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d/M/yyyy").withLocale(Locale.ITALY);
+			LocalDate date = null;
+			try {
+				date = LocalDate.parse(dataAsString, dateFormatter);
+			}
+			catch(DateTimeParseException e) {
+				throw new BadFileFormatException("Data mal formattata:\t" + line);				
+			}
+			// conversioni di tipo: voto
+			Voto voto = null; 
+			try {
+				voto = Voto.of(votoAsString);
+			}
+			catch(IllegalArgumentException e) {
+				throw new BadFileFormatException("Voto illegale o mal formattato:\t" + line);				
+			}
+			try {
+			carriera.inserisci(new Esame(
+					new AttivitaFormativa(id, nome, cfu),
+					date,
+					voto
+					));
+			}
+			catch(IllegalArgumentException e) {
+				throw new BadFileFormatException("Inserimento illegale in carriera:\t" + line);				
+			}
+		}
+		return carriera;
+	}
+
+}
+
+
+---------------------------------
+CASO CON STRING TOKENIZER (CLASSE AUSILIARIA):
+
+private List<Previsione> caricaPrevisioni(BufferedReader reader) throws BadFileFormatException, IOException{
+		List<Previsione> previsioni = new ArrayList<Previsione>();
+
+		try {
+
+			String riga = null;
+
+			while (!(riga = reader.readLine().trim()).equalsIgnoreCase("FINE")) {
+
+				if (riga.isEmpty())
+					continue;
+
+				StringTokenizer tokenizer = new StringTokenizer(riga, "\t\r\n");
+				String frase = tokenizer.nextToken().trim();
+				int valore = Integer.parseInt(tokenizer.nextToken().trim());
+
+				Previsione previsione = null;
+
+				if (tokenizer.hasMoreTokens()) {
+					String allowedSignsToken = tokenizer.nextToken();
+					try {
+						String[] signs = allowedSignsToken.split(",");
+						Set<SegnoZodiacale> allowedSigns = new HashSet<>();
+						for (String sign : signs) {
+							allowedSigns.add(SegnoZodiacale.valueOf(sign.trim().toUpperCase()));
+						}
+						previsione = new Previsione(frase, valore, allowedSigns);
+					} catch (Exception e) {
+						throw new BadFileFormatException("lista segni con valori errati");
+					}
+				} else {
+					previsione = new Previsione(frase, valore);
+				}
+
+				previsioni.add(previsione);
+			}
+
+		} catch (Exception e) {
+			throw new BadFileFormatException(e);
+		}
+
+		if (previsioni.size() == 0)
+			throw new BadFileFormatException("Nessuna previsione");
+
+		return previsioni;
+		}
+}
+
+----------------------------------
+ESEMPIO TRIM 
+/*  Dipendente:	Rossi Mario
+		Mese di:	GENNAIO 2022
+		Ore previste: 	 	6H/9H/6H/9H/6H/0H/0H
+		Saldo precedente:	12H07M
+		
+		03 Lunedì	08:30	14:30
+		04 Martedì	08:30	17:30
+		05 Mercoledì	08:30	14:30	Riposo Compensativo
+		07 Venerdì	08:30	14:30	Riposo Compensativo
+		10 Lunedì	07:30	13:42	
+		10 Lunedì	13:42	13:53	Pausa Pranzo
+		10 Lunedì	13:53	15:45	
+		11 Martedì	07:30	13:28		
+		...
+	 **/
+
+	@Override
+	public Cedolino leggiCedolino(Reader rdr) throws IOException {
+		if (rdr==null) throw new IllegalArgumentException("reader is null");
+		BufferedReader reader = new BufferedReader(rdr);
+		
+		// Lettura e validazione intestazione
+		String nomeDipendente  		  = analizzaIntestazioneRiga1(reader.readLine());
+		LocalDate dataCedolino 		  = analizzaIntestazioneRiga2(reader.readLine());
+		SettimanaLavorativa settimana = analizzaIntestazioneRiga3(reader.readLine());
+		Duration saldoPrecedente 	  = analizzaIntestazioneRiga4(reader.readLine());
+		
+		// creazione del cedolino inizialmente vuoto
+		Cedolino cedolino = new Cedolino(nomeDipendente,dataCedolino,settimana,saldoPrecedente);
+
+		// Lettura ed elaborazione delle righe con le singole voci
+		
+		DateTimeFormatter timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.ITALY);
+		String line;
+		while((line = reader.readLine())!=null) {
+			if (line.isBlank()) continue; // skip blank lines
+			String[] items = line.split("\t+");
+			
+			// ci devono essere sempre 3 o 4 parti
+			if (items.length>4 || items.length<3) 
+				throw new BadFileFormatException("La riga non contiene una voce correttamente formattata (numero elementi errato)\nRiga: " + line);
+			String strGiornoConNome = items[0].trim().toLowerCase(); 
+			String strOraEntrata = items[1].trim(); 
+			String strOraUscita  = items[2].trim();
+			String strCausale 	 = items.length==4 ? items[3].trim().toUpperCase().replace(' ', '_') : "";
+
+			// validazione e conversione
+			String strGiornoENome[] = strGiornoConNome.split("\s+");
+			if (strGiornoENome.length!=2) 
+				throw new BadFileFormatException("La riga non contiene una voce correttamente formattata (Numerogiorno NomeGiorno)\nRiga" + line);
+			try {
+				LocalDate data = dataCedolino.withDayOfMonth(Integer.parseInt(strGiornoENome[0])); // recuperiamo mese e anno dalla data del cedolino 
+				// verifichiamo che il giorno della settimana sia corretto
+				String nomeGiornoAtteso = CedolinoReader.getDayOfWeekName(data.getDayOfWeek(), Locale.ITALY);
+				if(!nomeGiornoAtteso.equalsIgnoreCase(strGiornoENome[1].trim())) throw new BadFileFormatException("Il giorno della settimana non corrisponde alla data\nRiga" + line);
+				// elaborazione orari
+				LocalTime oraEntrata    = LocalTime.parse(strOraEntrata, timeFormatter);
+				LocalTime oraUscita     = LocalTime.parse(strOraUscita,  timeFormatter);
+				// elaborazione causale
+				Optional<Causale> optCausale = 
+						!strCausale.equals("") ? Optional.of(Causale.valueOf(strCausale)) : Optional.empty();
+				cedolino.aggiungi(new VoceCedolino(data, oraEntrata, oraUscita, optCausale));
+			}
+			catch(DateTimeException | IllegalArgumentException e) {
+				throw new BadFileFormatException("La riga contiene una data o un orario non correttamente formattati\nRiga" + line + e.getMessage());
+			}
+		}
+		return cedolino;
+	}
+
+-------------------------------
+
+	public ContoCorrente readCC(Reader rdr) throws IOException {
+		if (rdr==null) throw new IllegalArgumentException("reader is null");
+		BufferedReader reader = new BufferedReader(rdr);
+		
+		long id;
+		// Elaborazione riga di intestazione
+		String line = reader.readLine();
+		String[] items = line.split("\s+");
+		// validazione input
+		if (items.length<2 || items.length>3)
+			throw new BadFileFormatException("Numero elementi errato nella riga di intestazione");
+		if (!items[0].toUpperCase().equals("CC"))
+			throw new BadFileFormatException("La riga di intestazione non inizia con 'CC'");
+		if (!items[1].toUpperCase().startsWith("N."))
+			throw new BadFileFormatException("La riga di intestazione non contiene 'N.'");
+		if (items.length>2 && !items[1].toUpperCase().equalsIgnoreCase("N."))
+			throw new BadFileFormatException("Numero elementi errato nella riga di intestazione");
+		
+		String ccId = items.length==2 ? items[1].substring("N.".length()) : items[2];
+		try {
+			id = Long.parseLong(ccId);
+			if(id<0) throw new BadFileFormatException("Il numero di conto corrente non può essere negativo");
+		}
+		catch(NumberFormatException e) {
+			throw new BadFileFormatException("La riga di intestazione non contiene il numero di conto corrente");
+		}
+		
+		// Elaborazione movimenti
+		
+		ContoCorrente cc = new ContoCorrente(id);
+		
+		while((line = reader.readLine())!=null) {
+			if (line.isBlank()) continue; // skip blank lines
+			items = line.split("\t+");
+			// ci devono essere sempre 4 parti
+			if (items.length!=4) 
+				throw new BadFileFormatException("La riga non contiene un movimento correttamente formattato'\t" + line);
+			String strDataContabile = items[0].trim(); 
+			String strDataValuta 	= items[1].trim(); 
+			String strImporto 	 	= items[2].trim();
+			String causale 	 		= items[3].trim().toUpperCase();
+			// validazione e conversione
+			DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(Locale.ITALY);
+			try {
+				LocalDate dataContabile = LocalDate.parse(strDataContabile,dateFormatter);
+				LocalDate dataValuta    = LocalDate.parse(strDataValuta,dateFormatter);
+				NumberFormat formatter = NumberFormat.getNumberInstance(Locale.ITALY);
+				double importo = formatter.parse(strImporto.replace(" ", "")).doubleValue();
+				Tipologia tip = causale.startsWith("SALDO") && !causale.startsWith("SALDO INIZIALE") ? Tipologia.SALDO : 
+								importo>0 ? (Tipologia.ACCREDITO) : 
+								importo<0 ? Tipologia.ADDEBITO : Tipologia.NULLO;
+				cc.aggiungi(new Movimento(dataContabile, dataValuta, tip, importo, causale.toUpperCase()));
+			}
+			catch(DateTimeParseException | ParseException e) {
+				throw new BadFileFormatException("Il movimento contiene una data o un importo non correttamente formattati'\t" + line);
+			}
+		}
+		return cc;
+	}
+}
+
+----------------------------
+ESEMPIO SENZA SPLIT E STRING TOKENIZER MA CON SOLO SUBSTRING
+public RailwayLine getRailwayLine(Reader rdr) throws IOException{
+		if (rdr==null) throw new IllegalArgumentException("reader is null");
+		BufferedReader reader = new BufferedReader(rdr);
+		SortedMap<String,Station> map = new TreeMap<>();
+		SortedSet<String> hubs = new TreeSet<>();
+		String line;
+		int lineLength = 0;
+		while((line = reader.readLine())!=null) {
+			int firstBoundary  = 8;
+			int secondBoundary = line.lastIndexOf(' ');
+			String stringProgKm  = line.substring(0,firstBoundary).trim();
+			String stringSpeed   = line.substring(secondBoundary).trim();
+			String stationName = line.substring(firstBoundary,secondBoundary).trim();
+			boolean isHub  = stationName.toUpperCase().endsWith("HUB");
+			if (isHub) {
+				stationName = stationName.substring(0,stationName.toUpperCase().indexOf("HUB")).trim();
+				hubs.add(stationName);
+			}
+			// Let us check that all lines have the same length
+			if(lineLength==0) { 
+				lineLength=line.length();
+			}
+			else if (lineLength!=line.length()) {
+				throw new IllegalArgumentException("a line has a different length - bad file format");
+			}
+			//
+			if(stringProgKm.length()==0 || stringSpeed.length()==0 || stationName.length()==0) { 
+				throw new IllegalArgumentException("badly formatted line");
+			}
+			double progKm; int speed; 
+			try {
+				NumberFormat formatter = NumberFormat.getNumberInstance();
+				if (!stringProgKm.matches("\\d+(\\,?\\d+)")) throw new IllegalArgumentException("wrong format in progKm: " + stringProgKm);
+				progKm = formatter.parse(stringProgKm).doubleValue();
+				speed = Integer.parseInt(stringSpeed);
+			}
+			catch(NumberFormatException | ParseException e) {
+				throw new IllegalArgumentException("wrong format in speed");
+			}
+			Station station = new Station(stationName,progKm,speed);
+			map.put(stationName, station);
+		}
+		return new RailwayLine(map, hubs);
+	}
+	
+	public static void main(String[] args) throws IOException {
+		Optional<List<String>> filenames = RailwayLineReader.getAllLineNames(Paths.get("."));
+		MyRailwayLineReader rdr = new MyRailwayLineReader();
+		for (String filename: filenames.get()) {
+			RailwayLine line = rdr.getRailwayLine(new FileReader(filename));
+			System.out.println(line);
+		}
+		
+	}
+}
+
+-----------------------------------------
+ESEMPIO CON PARSEPOSITION //ti trova l'indice che non va all'intero di una stringa
+	private Tariffa readConsumo(StringTokenizer t) throws BadFileFormatException {
+		if (t.countTokens() != 1) throw new BadFileFormatException("Errore lunghezza");
+		String valore = t.nextToken().trim();
+		double costo;
+		ParsePosition position = new ParsePosition(0);
+		try {
+			costo = f.parse(valore,position).doubleValue();
+			if(position.getIndex() != valore.length()) throw new BadFileFormatException("Errore formattazione");
+		} catch(Exception e) {throw new BadFileFormatException("Valore consumo errato");}
+		
+		return new TariffaAConsumo("A CONSUMO", costo);
+	}
+

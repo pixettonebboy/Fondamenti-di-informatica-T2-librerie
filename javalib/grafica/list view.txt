@@ -1,0 +1,7 @@
+// *** DA FARE: popolamento list view ***
+		listView.setItems(FXCollections.observableArrayList(this.controller.getVociBancaOre()));
+
+
+
+// ----- aggancio listener per gestione eventi -----
+		listView.getSelectionModel().selectedItemProperty().addListener((obj, oldMov, newMov) -> myHandler(newMov));		

@@ -1,0 +1,196 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+    Java implementa un sistema di strutture dati generiche, globali e tipizzabili.
+    Quattro interfacce principali in java:
+
+
+    - Collection<T> (INTER)     >>  nessuna ipotesi specificata
+
+        - Set<T> (INTER)        >>  insieme di elementi senza duplicati
+            - SortedSet<T>      >>  nessun duplicato e in sequenza ordinata
+            - NavigableSet<T>   >>  come SortedSet, iterabile in entrambe le direzioni
+
+        - List<T>               >>  sequenza indicizzata di elementi (elemento 0, 1, 2...)
+        
+
+     // Le Mappe non derivano da Collection
+     - Map<K, V>                >>  tabella chiavi/valori
+            - SortedMap<T>      >>  chiavi in sequenza ordinata
+            - NavigableMap<T>   >>  come SortedMap, iterabile in entrambe le direzioni
+
+
+
+>> ITERABLE
+
+    Si introduce anche l'interfaccia Iterable<T>, che marca la caratteristica di
+    un contenitore di essere iterabile, in modo generale e flessibile.
+    Con questa interfaccia, il contenitore è riconosciuto dal "foreach".
+    (Il foreach non permette la modifica della lista durante lo scorrimento di essa)
+    
+    2 metodi come Nodo delle Liste in C:
+      - hasNext()    // C'è o non un successivo
+      - next()       // Restituisce elemento successivo
+
+    for(  Iterator<Tipo> i = coll.iterator();  i.hasNext()  ){
+        // Operazione su x = i.next()
+    }
+
+    Si è introdotto infine anche un ListIterator, adatto per le liste che sono percorribili liberamente.
+    Ha queste funzioni extra:
+      - previous() e hasPrevious()
+      - nextIndex() e previousIndex()
+      - add(index)  // Aggiunge elemento a posizione index
+      - set(index)  // Modifica elemento a posizione index
+
+    NON HA COSTRUTTORE:
+    di solito si fa
+    ArrayList<Classe> lista = new ArrayList<>();
+    // Riempio
+    Iterator<Classe> iter = lista.listIterator();
+
+
+
+>> COLLECTION<T>  ( INTERFACCIA ) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Sappiamo solo che l'insieme è iterabile.
+
+    - .add(e)           >> Aggiunge elemento e
+    - .remove(e)        >> Toglie elemento e
+    - .contains(e)      >> boolean sulla presenza dell'elemento
+    - .isEmpty()        >> boolean se Collection è vuota
+    - .size()           >> numero elementi collezione
+    - .toArray()        >> Crea un array con gli stessi elementi
+    - .equals(col2)     >> Verifica se due collezioni sono uguali
+    - .toString()       >> Stampa "[el1, el2, ... , elN]"
+      // Per altra sintassi:    for(String st : col){  System.out.print(st + " ");  }
+
+    // Non esiste GET, si può solo iterare nella collezione
+      
+
+
+
+>> SET<T>  ( INTERFACCIA da COLLECTION )
+
+    Deriva da Collection, privo di duplicati
+
+    // Modifiche rispetto alla collection:
+    - .add(e)           >> Aggiunge elemento e solo se non è già presente, restituisce FALSE se non è stato inserito
+    - .equals(set2)     >> Non conta l'ordine degli elementi, ma che siano su entrambi i set
+
+>> SORTEDSET<T>  ( INTERFACCIA da SET )
+
+    Deriva da Set, privo di duplicati, elementi in ordine.
+    La classe contenuta deve essere COMPARABLE per poter effettuare l'ordinamento
+
+    // Modifiche rispetto al set:
+    - .first()          >> Primo elemento
+    - .last()           >> Ultimo elemento
+
+    - .headSet(e)       >> Crea un SortedSet con solo elementi minori ad "e" fornito
+    - .subSet(e1,e2)    >> Crea un SortedSet con solo elementi compresi tra "e1" e "e2" forniti
+    - .tailSet(e)       >> Crea un SortedSet con solo elementi maggiori ad "e" fornito
+
+
+
+>> LIST<T>  ( INTERFACCIA da COLLECTION )
+    
+    Simile ad un array ma uso semplificato.
+
+    - .add(e)           >> Aggiunge elemento e in fondo alla lista
+    - .equals(list2)    >> Vero se gli elementi corrispondono a due a due (o entrambi null)
+    - .get(index)       >> Prendi elemento a posizione index
+
+
+
+
+
+
+>> MAP<K, T>  ( INTERFACCIA ) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Ogni riga è formata da chiave/valore, di due tipi disconnessi (es String nome, Int età),
+    si può accedere ad un corrispettivo valore soltanto passando la chiave corrispettiva (non è sequenziale).
+    Funzionano tramite EQUALS e HASHCODE degli oggetti salvati, quindi devono averle per funzionare correttamente.
+
+    - .put(key, el)     >> Inserisce una nuova riga (chiave univoca), restituisce FALSE se non è stata inserita
+    - .get(key)         >> Prelevare il valore corrispettivo alla chiave
+    - .containsKey(key) >> Verifica se chiave è presente in tabella
+    - .containsValue(v) >> Verifica se l'elemento è presente
+
+    - .keySet()         >> Crea un Set con le chiavi della colonna apposita
+    - .values()         >> Crea ua collection con i valori della colonna apposita
+    - .entrySet()       >> Crea un Set di Entry (Rappresenta una riga, coppia chiave/valore)
+
+
+>> SORTEDMAP<K, T>  ( INTERFACCIA da MAP )
+
+    Le chiavi sono ordinate, la classe deve essere COMPARABLE.
+    In alternativa, si può passare un COMPARATOR al costruttore della SortedMap.
+
+    - .firstKey()       >> Prima chiave della mappa
+    - .lastKey()        >> Ultima chiave della mappa
+    - .headMap(k)       >> Crea una SortedMap con solo righe di chiave minore a "k" fornita
+    - .subMap(k1,k2)    >> Crea una SortedMap con solo righe di chiave comprese tra "k1" e "k2"
+    - .tailMap(e)       >> Crea una SortedMap con solo righe di chiave maggiore ad "k" fornita
+
+
+
+>> FUNZIONI STATICHE DELLE COLLECTION >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    - .sort(list)    >> Ordina una lista con una mergeSort   
+    - .binarySearch(listaOrdinata, e)    >> Restituisce l'indice di "e" all'interno della lista Ordinata
+      // Solo liste, le uniche che hanno la get e dove posso riordinare gli elementi
+
+    - EMPTY_LIST     >> Lista Vuota
+    - EMPTY_SET      >> Insieme vuoto
+    - EMPTY_MAP      >> Mappa Vuota
+
+
+
+
+
+
+
+>> IMPLEMENTAZIONI MODIFICABILI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Le precedenti interfacce offrivano solo costruttori Factory ed erano immodificabili dopo la creazione.
+    Queste sono le classi che implementano quelle interfacce:
+
+    [List]:  ArrayList
+    [Set]:   HashSet, TreeSet, EnumSet (x gli enum)
+    [Map]:   HashMap, TreeMap, EnumMap (x gli enum)
+
+    
+    --esempio:
+    // Lista Non Modificabile
+    List<String> l1 = List.of("Bologna", "Modena", "Parma");
+    System.out.println(l1);
+
+    // Lista Modificabile
+    ArrayList<String> l2 = new ArrayList<String>();
+    l2.add("Piacenza");   l2.add("Cesena");   l2.add("Reggio");
+    System.out.println(l2);
+
+
+
+>> DIAMOND OPERATOR
+  List<String> l1 = new ArrayList<>();  // Posso non specificare una seconda volta il tipo contenuto dentro la coll.
+  ...invece che...
+  List<String> l1 = new ArrayList<String>();
+
+
+
+>> CONVERSIONI TRA STRUTTURE
+
+    Sfrutto il costruttore per copia:
+
+    List<String> lista = List.of("Pippo", "Pluto", "QuiQuoQua", "Paperino", "Zio Paperone");
+    List<String> l2 = new ArrayList<>(lista);
+    Set<String> set = new HashSet<>(lista);
+
+    - lista.toArray(new Classe[0]);   // Falso argomento del tipo di oggetto di cui voglio l'array
+    - Arrays.asList(array)
+
+

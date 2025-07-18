@@ -1,0 +1,24 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+    I primitivi (int, boolean, float) in java non sono Oggetti,
+    non ho nessun metodo di aiuto
+
+    Sono stati creati dei Wrapper che li contengono, e che aggiungono metodi:
+      - Integer
+      - Float
+      - Double
+      - ...
+
+    Integer.valueOf(22)  // Costruzione tramite factory  (BOXING)
+    // new Integer(22) == new Integer(22)   FALSE
+    // grazie all'hashCode   Integer.valueOf(22) == Integer.valueOf(22)   TRUE
+ 
+    --esempio: (per accedere al valore)
+    Integer i = Integer.valueOf(22);
+    int ciao = i.intValue();
+
+    // In java Boxing e Unboxing viene eseguito in modo implicito, non ce ne rendiamo conto
+    (Es: concanena int ad una stringa = int diventa Integer, concateno la toString() di Integer alla stringa)

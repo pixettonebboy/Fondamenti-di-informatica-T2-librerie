@@ -1,0 +1,111 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    Try/Catch servono a circondare blocchi di codice in cui
+    le anomalie sono molto frequenti e quindi aspettate.
+    (Esempio: tutte le letture/scritture file, tutte le letture/scritture su dispositivi...)
+
+    - Evitano continui if nel codice
+
+    - Evitano che preveda tutte le casistiche di errore
+
+    - Non solo bloccano il crash del programma,
+      mi consegnano anche il problema sottoforma di classe
+
+
+    " L'allarme non si stampa né si ignora: si gestisce "  cit. Denti
+
+
+
+    Nel codice pericoloso scrivo:
+    
+    try {
+	// operazioni critiche, appena trovo un errore mi blocco e vado nel catch
+    }
+    catch (*tipoeccezione* e) {
+        // in caso di problemi
+        // si continua qui
+    }
+
+    /////
+    catch (*tipoeccezione2* e) {
+             // Posso specificare più di un tipo di eccezione tratte da un solo try
+    }
+    /////
+    finally {
+	...  // Il blocco finally si esegue comunque, che sia finito nel catch o a fine try.
+             // Marca operazioni obbligatorie legate al try/catch (es. chiusura stream)
+    }
+
+
+
+    --esempio (Apertura File):
+        try {
+            FileReader f = new FileReader("info.txt");
+        }
+        catch(FileNotFoundException e){
+            // gestione eccezione
+        }
+
+
+    Il metodo pericoloso che verrà chiamato deve lanciare un'allarme con un "throw" in caso di errore:
+    --esempio:	
+     
+    public class Pericolosa {   
+                                                     
+
+         public void MetodoPericoloso() // throws *tipoEccezione* {   // Lo metto se voglio che l'utilizzatore del mio metodo
+         						              // la circondi per forza con try/catch
+             ...                                                     
+             if(errore){
+                 throw new *tipoEccezione*( "descrizione eccezione" );   // Posso anche evitare di descriverla (non metto la stringa)
+             }
+         }
+
+     }
+
+
+
+
+>>>> ECCEZIONI
+
+    Ci sono vari tipi di eccezioni e variano a seconda del problema che vogliono rappresentare.
+    Le più comuni:
+        - ParseException              // Conversione fallita
+            - NumberFormatException   // Conversione stringa/numero fallita
+        - FileNotFoundException       // File in apertura non trovato
+        - IllegalArgumentException    // Argomenti passati al costruttore non accettati
+        - IOException                 // Errore in scrittura/lettura su file
+
+    Ovviamente in caso di necessità mi posso creare le mie stesse eccezioni
+    
+
+    --esempio:
+        public class ImpossibleTriangleException extends IllegalArgumentException {
+            public ImpossibleTriangleException() { super(); }
+            public ImpossibleTriangleException(String s){ super(s); }
+        }
+     
+
+
+    Posso lanciare Eccezioni Logiche partendo da Eccezioni Fisiche:
+    --esempio:
+       public void readUserData(String user) throws ProfileNotFoundException, ImageNotFoundException{
+
+           try {
+               FileReader fr = new FileReader(user +".png");
+           ...
+           } catch(FileNotFoundException e2){             // La Ecc. fisica sarebbe FileNotFound, ma stavo cercando un immagine e
+               throw new ImageNotFoundException(e2);      // per essere più precisi chiamo ImageNotFoundExc. (logica)
+           }
+       }
+
+
+
+
+
+
+

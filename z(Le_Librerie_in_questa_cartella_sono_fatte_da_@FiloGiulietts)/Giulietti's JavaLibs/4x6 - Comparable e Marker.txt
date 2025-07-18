@@ -1,0 +1,44 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    Spesso implementare un'interfaccia vale anche solo come etichetta per:
+	- Esprimere una qualità (Comparable, Printable ...)         >>      1 solo metodo nell'interfaccia corrispondente a quell'azione
+        - Concetti astratti (Azione futura, Listener di eventi ...)
+
+
+>>> COMPARABLE
+
+    Le classi comparable hanno la qualità di avere una relazione d'ordine,
+    e quindi essere ordinate secondo un criterio.
+
+    Interfaccia:   Comparable<T>     con metodo      public int compareTo(T that);
+
+    Il metodo poi andrà definito dentro la classe che la implementa
+ 
+    Potrei pure creare una classe apposita il cui scopo è solamente quello di
+    Comparare due oggetti di una stessa classe.
+    --esempio:
+
+        Comparator<Persona> cmp1 = new CognomeComparator();
+        Comparator<Persona> cmp2 = new NomeComparator();
+        Comparator<Persona> cmp3 = new EtaComparator();
+
+        Arrays.sort(persone, cmp1 );    print("per solo cognome", persone);
+        Arrays.sort(persone, cmp2 );    print("per solo nome", persone);
+        Arrays.sort(persone, cmp3 );    print("per sola età", persone);
+
+
+    Oppure anche creare una classe anonima:
+    --esempio:
+
+    Arrays.sort(persone, 
+        new Comparator<Persona>() {
+            public int compare(Persona p1, Persona p2){
+                return p1.getCognome().compareTo(p2.getCognome());
+            }
+	}
+    );
+ 

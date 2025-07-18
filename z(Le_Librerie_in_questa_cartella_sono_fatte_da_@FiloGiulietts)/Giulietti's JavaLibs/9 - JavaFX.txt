@@ -1,0 +1,415 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    Siamo passati da Java.Swing a Java.FX per creare grafica in Ecplise.
+
+    JavaFX sfrutta uno Stage di Application (fornito dal sistema operativo e adattato da java)
+    e ci si disegna dentro quello che vogliamo.
+
+    Application >> Stage >> Scene >> Pane >> Componenti
+
+    Application è fornito di init(), start(), stop().
+    L'unico che ci interessa per ora è start, dove viene creato lo Stage e ci viene passato.
+
+    
+
+    --esempio:
+
+    import javafx.application.Application;
+    import javafx.scene.Scene;
+    import javafx.stage.Stage;
+
+    public class FinestraMoltoBella extends Application {
+        public void start(Stage stage){
+            stage.setTitle("Ciao");    // Si aprirà una finestra vuota con titolo "Ciao"
+            stage.show();
+        }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    ^^^^^^^
+    In JavaFX, il compilatore JDK aggiunge automaticamente il main di default,
+    che richiama il metodo ereditato launch
+
+    - In Eclipse ciò avviene solo se il progetto è del tipo JavaFX project, previa installazione del plugin
+    - Se si fa un progetto Java standard, occorre scrivere a mano questo main e aggiungere la libreria JavaFX
+
+
+
+
+
+>> COMANDI UTILI PER STAGE
+
+    - .setTitle(*stringa*);                      >> Imposta il titolo della pagina
+    - .setX(*x*) / .setY(*y*)                    >> Imposta la posizione della finestra nello schermo
+    - .setWidth(*w*) / setHeight(*h*)            >> Imposta la dimensione della finestra fissa a *w* e *h*
+    
+    - .setMinWidth(*mw*); .setMaxWidth(*Mw*)     >> Imposta i valori minimi e massimi che la finestra
+    - .setMinHeigth(*mh*); .setMaxHeight(*Mh*);  >> può assumere durante il ridimensionamento
+
+    // Posso sfruttare screen.getWidth/getHeight per calcolarmi posizioni/dimensioni variabili
+
+    - .show()   >> Di default lo stage è nascosto, con show verrà mostrato a schermo
+
+
+
+
+
+>> ESEMPIO DI GRAFICA CON CANVAS (Tutto da disegnare a mano, difficile che si utilizzi) >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    public class EsJavaFX04 extends Application {
+        public void start(Stage stage){
+	    stage.setTitle("Esempio 4");
+	    FlowPane panel = new FlowPane();
+	    panel.setPrefSize(200,130);
+
+	    Canvas canvas = new Canvas(150, 130);
+	    panel.getChildren().add(canvas);
+	    GraphicsContext g = canvas.getGraphicsContext2D();
+	    g.setFont(Font.font("Serif", FontWeight.BOLD, 20));
+	    g.setFill(Color.RED); g.fillRect(20,20, 100,80);
+	    g.setFill(Color.BLUE); g.strokeRect(30,30, 80,60);
+	    g.setFill(Color.BLACK); g.fillText("ciao",50,60);
+	    Scene scene = new Scene(panel);
+	    stage.setScene(scene);
+	    stage.show();
+	}
+    }
+
+
+
+
+>> GRAFICA A COMPONENTI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Si sfruttano componenti già creati e configurabili per realizzare la nostra applicazione:
+    Un Pane contiene e dispone i singoli componenti, e noi ne aggiungiamo a scelta.
+
+   Componenti presenti:
+     - Bottoni
+     - Testo (lettura/scrittura)
+     - Liste e tabelle
+     - Regolazioni
+     - Dialoghi
+     - Grafici
+
+
+   --esempio:
+
+   public class EsJavaFX06 extends Application {
+       public void start(Stage stage){
+           stage.setTitle("Ciao");
+	   FlowPane panel = new FlowPane();              // Creo un pannello contenitore
+
+	   Label l1 = new Label("Etichetta 1");          // Creo le mie due label
+	   Label l2 = new Label("Etichetta 2");
+	   l1.setFont(Font.font("Courier New", FontWeight.BOLD, 24));
+	   l2.setFont(Font.font("Times New Roman", FontPosture.ITALIC, 18));
+
+	   panel.getChildren().addAll(l1,l2);            // Una volta configurati, li aggiungo al pannello
+
+	   Scene scene = new Scene(panel,Color.WHITE);   // Creo la scena col pannello
+	   stage.setScene(scene);                        // La applico allo stage
+	   stage.show();
+	}
+   }
+
+
+>> CHIAMATA PER EVENTI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Esistono componenti sensibili ad eventi che accadono durante l'esecuzione (es. bottone -> viene premuto)
+    Sfruttare questi Eventi, decidendo chi deve essere influenzato e come reagire, 
+    può alleggerire di molto il codice e permette l'interazione fra l'utente e la finestra.
+
+    Inoltre evita questo:
+
+    while(true){
+         if(bottone1.isPremuto()){  *fai questo*  }    // Se lo fai per 100 componenti il pc diventa lava
+    }
+    
+    
+    A questo fine vediamo anche la comodità di aver diviso grafica e logica (model, ui), visto che a qualsiasi
+    logica posso adattare una qualsiasi grafica, sono indipendenti.  (MVC)
+
+    Un Evento viene ascoltato solo se assegnamo noi chi deve farlo, che si chiamerà Listener.
+      Evento = Cosa è accaduto   >>>>  Listener = Lui che reagisce se accade un evento in particolare
+
+    Per creare un listener, darò alla classe l'etichetta "EventHandler<*tipoEvento*>"
+    e dovrà implementare il metodo "void handle(*tipoEvento* ev)", che definirà la reazione.
+
+    Poi assegnerò l'istanza della classe Listener al componente che genera l'evento desiderato.
+
+
+    --esempio:
+   
+    // Deve invertire il testo di una label alla pressione di un bottone.
+    // Il bottone quando premuto genera l'evento "ActionEvent"
+
+    class StupidoListener implements EventHandler<ActionEvent> {
+	private Label lab;
+	public StupidoListener(Label label){   lab=label    }
+
+	public void handle(ActionEvent event) {
+	    lab.setText(lab.getText().equals("Tizio") ? "Caio" : "Tizio");
+	}
+    }
+
+    ...nello start...
+
+    ...
+    Label lab = new Label("Tizio");
+    Button b = new Button("Tizio/Caio");
+    b.setOnAction( new StupidoListener(lab) );
+    ...
+
+    
+    // NOTA: Potrei benissimo usare una lambda expression, che effettivamente
+    // rappresenta una funzione. Mi evito di creare una classe solo per quello...
+
+    b.setOnAction( e -> lab.setText(lab.getText().equals("Tizio") ? "Caio" : "Tizio")  );
+
+    // Quindi a meno che la mia funzione sia veramente complessa, userò quasi sempre le lambda
+
+
+
+
+>> OBSERVABLE VALUE
+
+    Esistono semplici variabili che sono state rese reattive a qualsiasi cambiamento.
+    Esempio: SimpleStringProperty genera un evento ogni volta che viene cambiato
+
+    Questo viene usato spesso nei componenti, con la chiamata a funzione
+    onChanged(observable, vecchioValore, nuovoValore)
+
+    --esempio:
+    
+    // Appena cambia il testo di txt1, scrivilo su txt2
+    txt1.textProperty().addListener(  (obs,oV,nV) -> txt2.setText(nV);   );
+
+    
+
+
+
+>> TUTTI I COMPONENTI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    (I tipi di pannelli e la loro disposizione si vede dall'immagine "Tipi di JFXPane")
+
+
+
+>> ImageView
+   
+   BorderPane panel = new BorderPane();
+   panel.setCenter(new ImageView( new Image("alberi.jpg", 400, 300, true, false)) );
+   
+   // .setCenter imposta il pannello al centro, e ci mette il componente
+   // l'immagine viene presa da memoria in modo relativo
+   // si specifica larghezza, altezza, (boolean)preserva aspetto, (boolean)effetto smooth
+
+
+
+>> TextField / TextArea
+
+    TextField = unica riga  /    TextArea = puoi andare a capo
+
+    FUNZIONI:
+       - .setEditable( *true/false* )           >> L'utente può o no modificarlo  
+       - .setText(*testo*)                      >> Imposta il testo
+       - .getText(*testo*)                      >> Prende il testo contenuto
+       - .setTooltipo( new Tooltip(*testo*) )   >> Mostra una finestrella con *testo* quando si è sopra col mouse
+
+    EVENTI:
+    - txt1.textProperty().addListener( (obs,oV,nV) -> *funz* );   // Chiama la funzione ad ogni modifica del testo
+
+
+
+
+>> Button
+
+    EVENTI:
+    - setOnAction( e -> *funz* )  >> Alla pressione
+
+
+
+>> CheckBox
+
+    E' una spunta, se la clicco commuta
+
+    FUNZIONI:
+    .isSelected()    >> Dice se è spuntata o no
+
+    EVENTI:
+    - setOnAction( e -> *funz* )  >> Alla pressione
+
+
+
+>> ToggleGroup - RadioButton
+
+    In un gruppo di RadioButton può esserne attivo uno alla volta.
+    Vengono quindi messi in un ToggleGroup per gestire l'unicità.
+
+    Per eventi e funzioni si sfrutta solo il ToggleGroup (controlla tutto)
+
+    --esempio:
+    tg = new ToggleGroup();
+    b1 = new RadioButton("Pere");     b1.setToggleGroup(tg);
+    b2 = new RadioButton("Mele");     b2.setToggleGroup(tg);
+    b3 = new RadioButton("Arance");   b3.setToggleGroup(tg);
+
+    EVENTI:
+    - tg.selectedToggleProperty().addListener( (obs,oV,nV) -> *funz* )   >> Quando si seleziona un altro radio.
+                                                                         >> oV e nV possono essere visti come RadioButton
+                                                                         >> se usato il cast (RadioButton)
+
+
+>> ListView
+
+    Elenco (con scrollbar automatica se serve) di elementi
+    dove è possibile selezionarne uno (o più se si imposta l'opzione)
+
+    FUNZIONI:
+    - listview.setItems( FXCollections.observableArrayList("Rosso", "Giallo", "Verde", "Blu") );   >> Riempie l'elenco
+    - .setSelectionMode(SelectionMode.MULTIPLE);   >> Imposta la selezione a più elementi
+    - .getValue()           >> Stringa del testo selezionato
+
+    - .getItems()        >> Restituisce la lista di elementi
+                         >> E' possibile aggiungerne/toglierne con .add(*stringa*) .remove(*stringa*)
+
+    EVENTI:
+    - .getSelectionModel().selectedItemProperty().addListener( (obs,oV,nV) -> *funz* );
+
+
+
+>> ComboBox
+
+    Uguale alla ListView, ma posso scrivere l'opzione come fosse un TextField e mi verrà selezionata
+
+
+
+>> DatePicker
+
+    Sceglie una data da un calendario. Dipende da LocalDate e DateTimeFormatter
+
+    FUNZIONI:
+    - .get/setValue()   >> Restituisce/Imposta data
+
+    EVENTI:
+    - .setOnAction( e -> *funz* )   >> Alla selezione di una nuova data
+
+    --esempio:
+
+    DatePicker picker, picker2;
+    DateTimeFormatter formatter;
+    TextField txt1;
+ 
+    ... 
+
+    picker.setOnAction( e -> {
+	java.time.LocalDate date = (java.time.LocalDate)(picker.getValue());
+	txt1.setText("Data selezionata: " + formatter.format(date) );
+	picker2.setValue( picker.getValue().plusDays(1));
+    });
+
+   
+
+
+>> ColorPicker
+
+    Uguale ma usato per selezionare un colore.
+    Unica differenza è che restituisce un Color, composto da r,g,b da 0 a 255
+
+
+
+>> Slider
+
+    Selettore a barra, scelgo un valore tra un range definito. Orizzontale di default.
+
+    FUNZIONI:
+    - new Slider(0,10,5);             >> Al costruttore passo minValue, maxValue, startValue
+    - slider.setBlockIncrement(*u*);  >> Forza lo spostamento di *u* unità per volta
+    
+    - .setMinorTickCount(*u*);        >> Crea tick ogni *u* unità
+    - .setMajorTickUnit(*u*);         >> Crea tick con etichetta ogni *u* unità
+    - .setShowTickMarks(true);        >> Imposta le stanghette della barra
+    - .setSnapToTicks(true);          >> Il cursore si sposterà solo sopra i tick segnati
+
+    - .setOrientation(Orientation.VERTICAL);   >> Imposta la barra in verticale
+
+    EVENTI:
+    - ..valueProperty().addListener( (obs,oV,nV) -> *funz*  )   >> Chiamata allo scorrimento del cursore
+
+
+
+>> Spinner
+ 
+    Simile a TextField ma numerico e con frecce laterali per scorrere il valore.
+    (Non lo userei mai :)  )  
+
+
+
+>> ProgressBar / ProgressIndicator
+
+    Dispositivi di output visivo, mostrano una percentuale.
+    Bar è una barra, Indicator è un cerchio.
+
+    FUNZIONI:
+    - .setProgress(*val*);   >> Riempie il progresso con *val* compreso tra 0 e 1  
+
+
+>> FileChooser
+   
+    Si usa per aprire/salvare file. Non ha una grafica, viene chiamato da altri componenti (es: bottone)
+    Se l'utente ESCE DAL DIALOGO SENZA FILE, si restituisce NULL.
+
+    --esempio:
+    button.setOnAction( e -> {          // Sfrutto la pressione di unn bottone
+        chooser = new FileChooser();
+        chooser.setTitle("Apri file");
+        selectedFile = chooser.showOpenDialog(stage);         // oppure showSaveDialog
+        // Qui il programma si congela e attende la risposta del dialogo
+        txt1.setText("File name: " + selectedFile.getName());
+        txt2.setText("Percorso: " + selectedFile.getPath());
+    });
+
+
+    // Potrei impostargli dei filtri:
+    chooser.getExtensionFilters().addAll(
+        new ExtensionFilter("Text Files", "*.txt"),
+        new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif")
+    );
+
+    // Potrei accettare più file:
+    List<File> selectedFiles = chooser.showOpenMultipleDialog(stage);
+
+
+
+>> Chart (Grafici)
+
+    Preimpostati per mostrare dati. Vengono creati in 5 passaggi:
+    1) Predisporre gli assi
+    2) Creare l'oggetto Chart con gli assi creati e un titolo
+    3) Creare una serie di dati (o pù)
+    4) Assegnare ad ogni serie le coppie (x,y)
+    5) aggiungere le serie nel grafico
+
+    --esempio:
+    CategoryAxis asseOrizz = new CategoryAxis();
+    asseOrizz.setLabel("Tipi di frutta");
+
+    NumberAxis asseVert = new NumberAxis();
+    asseVert.setLabel("Vendite");
+
+    BarChart<String,Number> chart = new BarChart<>(asseOrizz,asseVert);
+    chart.setTitle("Andamento vendite frutta");
+
+    XYChart.Series<String,Number> modena = new XYChart.Series<>();   // Scelgo pure il tipo di grafico (su immagine libreria)
+    modena.setName("Modena");
+    modena.getData().add( new XYChart.Data<>("Mele", 30));
+    modena.getData().add( new XYChart.Data<>("Pere", 15));
+    modena.getData().add( new XYChart.Data<>("Arance", 50));
+    chart.getData().add(modena);
+

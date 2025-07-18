@@ -1,0 +1,92 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+    Esprime una lista di casistiche.
+    E' una classe final che può solo implementare interfacce, non altro.
+
+    - Costruttore Privato
+    - ordinal() >> Restituisce l'indice per quel valore nell'elenco
+    - values() restituisce un array con tutti i possibili valori dell'array
+
+    - valueOf(String)  restituisce l'oggetto corrispondente alla stringa passata
+      ATTENZIONE:
+      Nella Persistenza circondare con try/catch >> lancia "IllegalArgumentException" se la stringa
+      da convertire non è presente in lista
+
+
+>> DICHIARAZIONE STANDARD  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    public enum Direction {
+       NORTH, SOUTH, EAST, WEST;    <-- "Diventano 4 oggetti statici dentro la classe Direction"
+    }
+
+    ...
+
+    Direction cesena = Direction.EAST;
+
+
+
+>> SWITCH EXPRESSION >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    var name = switch(dir) {
+       case Direction.NORTH -> "North";
+       case Direction.SOUTH -> "South";
+       case Direction.EAST -> "East";
+       case Direction.WEST -> "West";
+    }
+
+
+
+>> AGGIUNGERE METODI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    public enum Direction {
+        NORTH, SOUTH, EAST, WEST;
+   
+        public Direction getOpposite(){
+            return switch(dir) {
+                case Direction.NORTH -> SOUTH;
+                case Direction.SOUTH -> NORTH;
+                case Direction.EAST -> WEST;
+                case Direction.WEST -> OVEST;
+            }
+        }
+
+    }
+
+
+
+>> ENUM CON VALORI ASSOCIATI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    public enum Direction {
+    
+        NORTH("Nord", 0),
+        SOUTH("Sud", 180),
+        EAST("Est", 90),
+        WEST("Ovest", 270);
+    
+        private String value;
+        private int degrees;
+
+        private Direction(String value, int degrees) {
+            this.value = value; this.degrees = degrees;
+        }
+
+        public String toString(){    return value + " a " + degrees + "°";   }
+    
+        public Direction getOpposite() { … }
+    }
+
+
+    --esempio:
+
+    public static void main(String[] args) {
+        Direction dir = Direction.NORTH;
+        System.out.println(dir);
+        System.out.println(dir.getOpposite());
+    }
+
+
+
+

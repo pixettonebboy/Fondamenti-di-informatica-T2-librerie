@@ -1,0 +1,21 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    Semplici classi create per contenere dati. Hanno solo:
+        - campi dati
+        - costruttore primario
+        - accessor
+        – equals, hashCode e toString "standard"    
+    
+    Sono final, niente ereditarietà.
+    Più semplici da creare, perchè standard:
+
+
+   --esempio:
+      public record Persona(String nome, int anni) {}
+      ...
+      Persona p1 = new Persona("John", 25);
+      System.out.println( p1.nome() );

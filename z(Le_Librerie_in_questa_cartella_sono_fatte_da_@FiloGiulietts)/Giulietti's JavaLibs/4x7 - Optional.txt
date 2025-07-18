@@ -1,0 +1,44 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    Per non esporre il codice a null che potrebbero farlo crashare, sono
+    stati inventati dei Wrapper chiamati Optional (Tipizzata).
+
+    - Si evitano continui "if(x != null){}" nei codici
+   
+    - Si evidenzia il fatto che quell'oggetto possa non esserci,
+      marcando più chiaramente il fatto
+
+
+
+    Si una per:
+        
+        - Incapsulare eventuali null di ritorno su funzioni
+       
+        - passare argomenti (realmente) opzionali
+
+
+
+    Metodi:
+        Optional.empty   		  // Costante che esprime il dato interno nullo
+        Optional.of()    		  // Incapsula il valore passato  
+        -->  .ofNullable()                // Incapsula il valore se non è nullo, altrimenti imposta "isEmpty"
+
+        .isPresent() / .isEmpty()	  // Check se è presente/non è presente il dato (quindi no/si null)
+        .get() / .getOrElse()             // estrae il valore (se presente)
+        -->  .orElse( *alternativa* )     // Restituisce il valore se è presente, altrimenti l'alternativa
+
+
+    Semplicemente contengono un oggetto di tipo scelto da te e gestiscono
+    il caso nel quale sia null (wrapper vuoto).
+
+    --esempio:
+    String nome = null;
+    Optional<String> optNome = Optional.ofNullable(nome);   // essendo nome = null, diventerà .isEmpty
+    
+    System.out.println( optNome );    // Non crasha, stampa "Optional.empty"
+
+    System.out.println( optNome.orElse("bho") );    // Stampa "bho" in alternativa al contenuto assente

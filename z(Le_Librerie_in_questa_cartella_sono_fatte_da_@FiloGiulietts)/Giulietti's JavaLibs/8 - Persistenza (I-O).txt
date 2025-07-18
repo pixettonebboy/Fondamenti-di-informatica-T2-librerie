@@ -1,0 +1,155 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+    Si sfruttano gli Stream, classi apposite che gestiscono la trasmissione
+    verso l'interno o l'esterno del programma di serie di byte (Stream >> InputStream/OutputStream)
+
+    Essendo la trasmissione di testo e oggetti molto frequente, ci sono classi
+    figlie di Stream create appositamente per quello, che evitano di lavorare coi byte.
+
+    Ovviamente uscendo dal programma potremmo trovare centinaia di problemi del caso,
+    (File inesistente, in uso, lettura sbagliata, dispositivo disconnesso...)
+    ricordarsi quindi di circondare con try/catch ogni trasmissione.
+
+
+
+>> TRY-WITH  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Visto il continuo uso dei try/catch, in java si può abbreviare la sintassi
+    usando una struttura "try-with"
+
+    Metodo da sfruttare SOLO SE l'intero utilizzo dello stream avviene dentro il blocco try,
+    non potrò salvarlo e usarlo fuori visto che verrà chiuso al termine del blocco.
+
+
+    // ESEMPIO METODO CLASSICO
+
+    // dichiarazione stream
+    try {
+	// apertura stream
+	// operazioni sullo stream
+    } catch(IOException e){   ...   }
+    finally{   // chiusura stream   }
+
+
+
+    // ESEMPIO METODO TRY-WITH
+
+    // Controlli, dichiarazione e chiusura stream tutti gestiti dal try
+
+    try(InputStream is = Files.newInputStream(Paths.get(args[0]))) {
+	int x = is.read(), n = 0;
+	while (x>=0) {
+	    System.out.print(" " + x); n++; x = is.read();
+        }
+	System.out.println("\nTotale byte: " + n);
+    } catch(IOException ex){
+	System.out.println("Errore di input");
+	System.exit(2);
+    }
+
+
+
+
+
+
+>> LETTURA/SCRITTURA FILE TESTO  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Quattro punti da seguire:
+        - Aprire file testo
+        - Si leggono intere righe di testo
+        - Si analizzano le righe lette (Tokenizzazione)
+        - Si usano i token per creare oggetti
+     
+    BufferedReader/BufferedWriter creano dei container di byte (buffer)
+    che permettono di leggere testi per intero, non dovrò lavorare coi byte.
+
+    I file testo per riportare i dati posso essere strutturati coi separatori
+    (ES:   Giovanni Rossi $ via Indipendenza 38$Bologna   )
+    (      Anna Maria Senzi$ via dell'Arco 18/2 $S.Lazzaro   )
+
+    oppure con sezioni di grandezza fissa
+    (ES:   Giovanni Rossi    via Indipendenza 38      Bologna     )
+    (      Anna Maria Senzi  via dell'Arco 18/2       S.Lazzaro   )
+
+
+
+
+>> FUNZIONI COMODE PER FILE
+
+    PER IL READER:
+    - reader.readLine()                    >> Restituisce la prossima riga del file (senza a-capo ("\r\n") ) o null se il file è finito
+
+
+    PER LE STRINGHE:
+    - *stringa*.trim()                     >> Restituisce *stringa* senza spazi o separatori
+    - *stringa*.split(",");                >> Restituisce un array di Stringhe dividendo *stringa* con il separatore. 
+                                              E' possibile impostare più separatori divisi da "|"  (ES   .split(":|,") )
+
+    - *arrayDaSplit*.length                >> Utile per controllo num. sezioni corretto dopo lo split    
+
+    - *stringa*.isBlank()                  >> Boolean che segnala se *stringa* è vuota
+    - *stringa*.startsWith(*inizio*)       >> Boolean che segnala se *stringa* inizia con *inizio* (ATTENZIONE, se usato assicurarsi che non ci siano spazi, usare trim())
+    - *stringa*.contains(*dentro*)         >> Boolean che segnala se *stringa* contiene *dentro*,
+    - *stringa*.replaceAll(*vec*, *nuo*)   >> Rimpiazza tutti i *vec* con *nuo* all'interno della stringa    
+
+
+    // per file a grandezza fissa, si legge una riga intera, si fa la substring() dei vari pezzi, la trim() e si elaborano i dati:
+
+    - *stringa*.length()                   >> Lunghezza della stringa, comoda se la dimensione di una riga deve essere fissa
+    - *stringa*.substring(*in*, *fi*)      >> Preleva da *stringa* i caratteri dall'indice *in* a *fi*
+
+
+
+
+
+>> SERIALIZZAZIONE DI OGGETTI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    E' addirittura possibile leggere o scrivere un'intero oggetto
+    su file binari, ulteriore cosa molto frequente nei programmi.
+
+    Il processo si chiama Serializzazione,
+    si fa sfruttando ObjectInputStream/ObjectOutputStream
+
+    La classe dovrà però implementare "Serializable", per essere marcata
+    come classe scrivibile in binario, e dev'essere provvista di un int statico SerialVersionUID,
+    per evitare di confondere vecchie versioni della stessa con le nuove.
+
+    --esempio:
+    public class Punto2D implements java.io.Serializable {
+	float x, y;
+	private static final long serialVersionUID = 1;
+	public Punto2D(float xx, float yy){  x = xx;  y = yy;  }
+	public float getX(){ return x; }
+	public float getY(){ return y; }
+    }
+    
+    // ESEMPIO SALVATAGGIO
+
+    Punto2D p = new Punto2D(3.2F, 1.5F);
+
+    try {
+	FileOutputStream f = new FileOutputStream("xy.bin");
+	ObjectOutputStream os = new ObjectOutputStream(f);
+	os.writeObject(p);
+	os.flush();
+	os.close();
+    }
+    catch (IOException e){   ...   }
+
+
+    // ESEMPIO LETTURA
+
+    Punto2D p = null;
+    try {
+	FileInputStream f = newFileInputStream("xy.bin");
+	ObjectInputStream is = new ObjectInputStream(f);
+	p = (Punto2D) is.readObject();
+	is.close();
+    } catch (IOException | ClassNotFoundException e){   ...   }
+
+
+
+    

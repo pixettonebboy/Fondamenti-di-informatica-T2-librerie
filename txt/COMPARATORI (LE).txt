@@ -1,0 +1,7 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+Comparator<Oggetto> cmp = Comparator.comparing(Oggetto::getData).thenComparing((Altro oggetto p)  -> p.getData().getGiorno());
+
+es:
+lista.sort(Comparator.comparing(VoceCedolino::getData).thenComparing(VoceCedolino::getOraEntrata)));

@@ -1,0 +1,70 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    L'insiemistica creata dall'estensione, dall'ereditarietà, viene mantenuta
+    anche logicamente nelle assegnazioni.
+
+
+    Ti do più di quel che ti serve, va bene lo stesso:
+    --esempio  (Counter2 figlio di Counter):
+
+    SI >> Counter c = new Counter2();   // Ha delle qualità in più che non servono, ma ho tutto quello di cui ho bisogno
+    NO >> Counter2 c = new Counter();   // Ha delle qualità richieste mancanti, non viene accettato
+
+    inoltre...
+
+    Osservando Counter c = new Counter2();
+    qui "c" verrà visto come counter, ma per la sua natura è ancora un Counter2.   (POLIMORFISMO)
+    --> c.toString() ==> richiama la toString() di Counter2                        (LATE BINDING & METHOD TABLES)
+
+    Visto che tutti gli oggetti derivano ad albero dalla classe Object,
+    potrei salvarmi tutto in variabili di tipo Object?  NO
+    Non avrei più certezza di cosa quella variabile contenga, non ci sono più filtri, anche se a volte è comodo.
+
+
+
+>> METODI POLIMORFI NATIVI (della classe Object)
+
+    Reimplementabili con @Override, generabili con Source >> Generator su eclipse
+
+    - String toString()
+    - boolean equals(Object obj)   // usa hashCode(), se non sovrascritta quella di object me ne trovo 2 (guarda dopo)
+                                   // (oggetti uguali = stesso hashCode)
+    - Object clone()
+    - int hashCode()               // Usato anche su HashMap e HashSet
+    
+
+
+>> EQUALS NON RIPETUTA (generabile in automatico da Eclipse)
+
+@Override
+public boolean equals(Object obj){
+    if (obj instanceof *Classe* that)          // instanceof fa entrare nel blocco if solo se la classe è di quel tipo,
+        return this.value == that.value;       // se lo fa genera l'oggetto locale "that" di quel tipo (utile per i check)
+    else return false;
+}
+
+
+
+>>>>>>> POLIMORFISMO ORIZZONTALE (TIPO PARAMETRICO) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    Non si stabilisce in definizione il tipo dell'argomento, ma durante l'uso
+
+    --esempio:
+    public static <T> boolean idem(T[] a, T[] b)   // T = tipo parametrico
+    ....
+    nomeclasse.<TipoParametro>idem(array1, array2)   // Alla chiamata
+
+
+    Da notare come già tutte le collections sfruttino il polim. orizzontale
+    per generalizzare il loro utilizzo per qualsiasi classe.
+
+
+
+
+
+
+

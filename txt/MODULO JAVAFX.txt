@@ -1,0 +1,9 @@
+--module-path="C:\Users\Achille\Downloads\javafx-sdk-19.0.2.1\lib"
+--add-modules=javafx.controls
+
+
+Premi Project --> Properties --> Java Build Path --> Class Path --> Add Library --> User Library -->
+--> User Libraries --> NEW (la devi chiamare JavaFX)
+Fai DOPPIOCLICK su JavaFX --> Add External Jars --> 
+Cerchi i jar dentro lib di javasdk (dentro applicativi --> moduli) --> aggiungi tutti -->
+apply and close

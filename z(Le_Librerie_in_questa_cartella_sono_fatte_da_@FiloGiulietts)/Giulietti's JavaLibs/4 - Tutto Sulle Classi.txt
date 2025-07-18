@@ -1,0 +1,49 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+
+    public class ClasseFiglia extends ClasseGenitore {
+    
+        // Costruttori non vengono ereditati, vanno rifatti
+
+        public ClasseFiglia(){
+    	    super(...);  // richiama anche il costruttore superiore con quegli argomenti
+	    // roba nuova
+        }
+
+        // Vengono ereditate solo qualità "public" o "protected"
+
+        // "super" offre la possibilità di accedere a cose del genitore
+        // --esempio:  super.campo / super.metodo()
+
+        // equals() & toString() sfruttano quelli del genitore
+        // con la super, ma vanno allungati
+
+        // usiamo la parola "final" per indicare metodi o attributi non ereditati dai figli
+
+        // usiamo la parola @Override sopra un metodo per sovrascrivere
+        // lo stesso preso dal padre (stesso nome e argomenti)
+
+        // Non posso "adattarmi" a più classi padre (servono interfacce)
+
+    }
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+

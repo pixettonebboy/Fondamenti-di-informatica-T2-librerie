@@ -1,0 +1,77 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+-------------------------------------------FORMATTATORI----------------------------------------------------------
+
+
+FORMATTATORI NUMERICI:
+
+|NUMERI|:      NumberFormat f = NumberFormat.getNumberInstance(Locale.CANADA);
+|PERCENTUALI|: NumberFormat fP = NumberFormat.getPercentInstance(); //default
+|VALUTE|:      NumberFormat fV = NumberFormat.getCurrencyInstance();
+
+|CIFRE DECIMALI|:
+fN.setMaximumFractionDigits(2); //massimo due cifre decimali
+System.out.println(fN.format(43.24563));
+
+|PARSING DI STRINGHE|:
+
+NumberFormat fV = NumberFormat.getCurrencyInstance(Locale.US);
+double numero = fV.parse("$123.56")).doubleValue();   //da stringa a valore numerico con formato
+
+[CASO PERCENTUALI] //bisogna mettere il non breakable space al posto di %
+fP.parse("72,35\u00A0%");
+
+|FORMATTATORE PERSONALIZZATO|:
+DecimalFormat formatter = new DecimalFormat(pattern) //con pattern di tipo String
+
+[CASO VALUTA EURO CON Locale.ITALY]
+DecimalFormat f = new DecimalFormat("¤ #,##0.##");    // € 32,00
+System.out.println(f.format(-1234.567)); // output: -€ 1.234,57
+
+var f = new DecimalFormat("¤ #,##0.##;¤ -#,##0.##"); //per mettere il meno dopo €
+System.out.println(f.format(-1234.567)); // output: € -1.234,57
+---------------------------------------
+FORMATTATORI PER DATE E ORARI:
+ 
+|SHORT|  gg/mm/aa               18/03/15                |  hh:mm      18:37
+|MEDIUM| gg siglamese aaaa      18 mar 2015		|  hh:mm:ss   18:37:24
+|LONG|   gg mese aaaa           18 marzo 2015		|   -
+|FULL|   giorno gg mese aaaa	mercoledi 18 marzo 2015 |   -
+
+DateTimeFormatter TformatterShort = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT); 
+DateTimeFormatter DformatterShort = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT); //caso 1
+LocalDate d = LocalDate.now();
+d.format(DformatterShort));
+|COMBINAZIONE:| 
+DateTimeFormatter DTform = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT);
+
+|PATTERN PERS.| DateTimeFormatter myFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+|ALTRO STATO| 
+DateTimeFormatter formatterShort = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(Locale.ITALY);
+
+|PARSE|: //RESTITUISCE UN TemporalAccessor
+var t = formatter.parse("12/02/23");
+LocalDate d = LocalDate.from(t);
+      // OPPURE //
+var dt = LocalDate.parse("12/02/23, 12:30", formatter); //d = 2023-02-12
+//il formattatore in questo caso è uno SHORT con Locale.ITALY
+
+
+[CASO PARTICOLARE: PARSING DEL MESE]
+DateTimeFormatter f = DateTimeFormatter.ofPattern("MMMM", Locale.ITALY);
+TemporalAccessor t = f.parse(stringa); //è da vedere se stringa coincide con un mese (MAGGIO)
+t.get(ChronoField.MONTH_OF_YEAR); 
+//è possibile che debba essere cambiata "stringa" con toLowerCase() o toUpperCase()
+
+[PARSE POSITION]:
+//Permette di trovare l'indice in cui si trova una formattazione errata:
+es.
+
+ParsePosition position = new ParsePosition(0);  //lo inizializzo a 0
+double valore;
+try{
+	valore = formatter.parse(stringa, position).doubleValue();
+	if (position.getIndex() != stringa.length()) throw new BadFileFormatException("");
+} catch(Exception e) {throw new BadFileFormatException("");}

@@ -1,0 +1,194 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+
+-------------------------------------------------STREAM---------------------------------------------------
+
+
+
+***[ESEMPI ESAMI]***
+
+[1]: //produrre un set (senza duplicati) dei soli elementi che... (da una lista)
+Set<Elemento> scelti = lista.stream().filter(e -> taleChe(e)).collect(Collectors.toSet());
+--
+[1.1] //data una lista di elementi, produrre un’altra lista senza duplicati dei soli elementi tali che…
+List<Elemento> result = lista.stream().filter(e -> taleChe(e)).distinct().collect((Collectors.toList());
+--
+[2] //produrre una lista di N valori casuali compresi fra 0 e M (possono esserci duplicati)
+List<Integer> elementiCasuali = new Random().ints(0,M).limit(N).boxed().collect(Collectors.toList());
+--
+[2.1] //idem con valori non duplicati
+List<Integer> scelti = new Random().ints(0,M).distinct().limit(N).boxed().collect(...);
+--
+[2.2] //idem con un set
+Set<Integer> scelti = new Random().ints(0,M).limit(N).boxed().collect(Collectors.toSet());
+
+[3] //produrre una lista di (non più di N) elementi selezionati 
+	casualmente da una lista (source) di M elementi possibili (di tipo Element)
+List<Elemento> scelti = new Random().ints(0,M).distinct().limit(N).mapToObj(source::get).collect(Collectors.toList());
+--
+[4] //convertire lo stream di int in stream di Integer tramite mapToObj anziché boxed
+List<Integer> elementiCasuali = new Random().ints(0,M).limit(N).mapToObj( i -> i ).collect(...);
+--
+[5] //data una lista di documenti • caratterizzati ciascuno da identificativo univoco (ID) e timestamp
+	produrre la lista dei soli documenti modificati entro quel timestamp
+List<Document> result = lista.stream().filter( doc -> doc.getTimeStamp().isBefore(timestamp) 
+|| doc.getTimeStamp().equals(timestamp) ).collect(Collectors.toList());
+--
+[5.1] //idem ma da solo il documento più recente
+Optional<Document> doc = lista.stream().filter( doc -> doc.getTimeStamp().isBefore(timestamp) || 
+doc.getTimeStamp().equals(timestamp) ).max(Comparator.comparing(Document::getTimeStamp));
+
+[6] //data una lista di tutti i voli aerei disponibili, caratterizzati da
+	aeroporti, orario di partenza e arrivo + giorni in cui operano,
+	produrre una lista dei voli fra i due aeroporti dati che operano in un giorno specifico
+
+List<FlightSchedule> voliDisponibili = orarioStagionale.stream().filter(fs ->
+fs.getDepartureAirport().equals(departureAirport) &&
+fs.getArrivalAirport().equals(arrivalAirport) &&
+fs.getDaysOfWeek().contains(dayOfWeek))
+.collect(Collectors.toList());
+
+---------------------
+[Approccio a stream:]
+– ottenere uno stream di elementi dalla collezione → .stream()
+– filtrare solo gli item con le «giuste» caratteristiche → .filter(…)
+– produrre il risultato mappando il vecchio oggetto nel nuovo → .map(…)
+– raccogliere i risultati nel «giusto» collector → .toCollection(…)
+-----------------------
+
+[STREAM DI COLLECTION]:
+List<String> elencoParole = ....;
+Stream<String> st = elencoParole.stream();
+
+[STREAM DA ARRAY]:
+String[] array = { "ciao", "ragazzi"};
+Stream<String> st = Stream.of(array);
+
+[STREAM DA ALTRI METODI DI ALTRE CLASSI]:
+es. Random;
+Random rnd = new Random();
+IntStream st = rnd.ints(1,100).limit(500);   //prende 500 valori randomici da 1 a 100 (interi)
+
+List<Integer> list1 = new Random().ints(1,100).parallel().limit(500).mapToObj(i->i*i)
+.collect(Collectors.toList()); 
+//in questo modo inserisce i valori (il quadrato di ogni intero) all'interno di una lista;
+
+----------------
+STREAM ELEMENTO PER ELEMENTO:
+
+[GENERATE]: Stream<Double> s = Stream.generate(Math::random);
+
+[ITERATE]: Stream<Integer> pari = Stream.iterate(2, n -> n+);
+
+------
+CONTEGGIO PAROLE DI UNA CERTA LUNGHEZZA: 
+List<String> elencoParole = ...;
+Stream<String> st = elencoParole.stream();
+long numParoleLunghe = st.filter( p->p.length()>8 ).count();
+
+-------
+CREARE UNA LISTA CON LE PAROLE TUTTE MAIUSCOLE:
+List<String> elencoParole = ...;
+Stream>String> st = elencoParole.stream();
+List<String> paroleMaiuscole = st.map( p->p.toUpperCase() ).collect(…);
+
+
+
+-----------------------------
+[TRASFORMAZIONI FONDAMENTALI]:
+
+[ filter(Predicate) ] :  filtra nel nuovo stream solo gli elementi dello stream che soddisfano la condizione
+
+[ map(Function) ]: applica ad ogni elemento x dello stream la funzione data
+
+[ mapToObj(Function) ]: si usa per stream di tipi primitivi (risultato è uno stream di tipi-oggetto)
+
+[ limit(n) ]: estrae i primi n elementi da uno stream
+
+[ skip(n) ]: fa l'opposto, esclude i primi elementi ed estrae gli altri
+
+[ st1.concat(st2) ]:  effettua la concatenazione di due stream
+
+esempio:
+Stream<Double> st1 = Stream.generate(Math::random).limit(10);   //10 valori randomici
+Stream<Double> st2 = st1.skip(5);    //prende gli ultimi 5
+Stream<Double> st3 = st1.concat(st2);    //concatena il primo stream con il secondo
+
+------------------------
+[RIDUZIONI FONDAMENTALI]:
+
+[count, min, max, average] conta, trova min, max, la media
+
+[ collect(collector) ]: riunisce gli elementi in un collettore (array o collection)
+
+[ reduce(function) ] applica ad ogni elemento dello stream la funzione data 
+		     (si specifica dove mettere il risultato, IL RISULTATO NON è LO STREAM)
+
+[ forEach(operation) ]: iterazione interna dell'opeazione data sugli elementi dello stream
+
+------------------------
+[COLLETTORI FONDAMENTALI]:
+
+[toCollection, toList, toMap(fk,fv), toSet]: restituisce una collection ecc...
+
+[groupingBy(criterio), partitioningBy(criterio)] {riunisce elementi a gruppi  
+						 {restituisce una mappa 
+
+[summarizingInt, summingLong, averagingDouble]: restituisce una maooa con tante entry quanti i gruppi
+						e per ogni riga il risultato relativo a tale gruppo
+
+[ joining -- per stream di stringhe] restituisce una stringa concatenata col separatore indicato
+
+-----------------------
+ESEMPI:
+
+[1]: //dalla List<Persona> lista  creare una stringa formata dalla concatenazione delle toString
+String res = lista.stream().map(Persona::toString).collect(Collectors.joining("\n"));
+
+[1.1] //variante con filtraggio in base all'età --> prendo i maggiorenni
+String res = lista.stream().filter(p->p.getEta()>=18).map(Persona::toString).collect(Collectors.joining("\n"));
+
+[2]: //creare un TreeSet con determinati filtri e con determinati calcoli
+TreeSet<Qualcosa> result = 
+coll.stream().filter( q->isGood(q,…)).map( q->calcRes(q,…)).
+collect(Collectors.toCollection(TreeSet::new));
+
+[3]: 
+Stream<String> st3 = st1.map(p->p.toUpperCase());
+List<String> listaParoleMaiuscole = st3.collect(Collectors.toList());
+
+[4]: //printare con una singola riga tutti gli elementi di uno stream;
+Stream<?> st = …;
+st.forEach( e -> System.out.print(e +", ") );
+System.out.println();
+
+[5]: //con reduce viene effettuata l'operazione a coppie di elementi consecutivi (primo elemento è l'el neutro, il secondo l'ooperazione da svolgere)
+     //peek duplica lo stream
+IntStream st = Stream.of( new int[]{1,2,54,23,12,-4,22} );
+int sum = st.peek( System.out::println).reduce(0, (res,v) -> res+v ); 
+
+[5.1]: //viene usato reduce con un solo argomento, restituisce un Optional nell'eventualità che sia vuoto lo stream
+
+OptionalInt sum2 = st2.reduce((res,v) -> res+v );
+
+[6]: //somma le lunghezze delle stringhe di uno stream
+int sumLengths2 = stP.mapToInt( String::length ).sum();
+
+[6.1]: //restituisce la media di un array
+IntStream st1 = Stream.of( new int[]{1,2,54,23,12,-4,22} );
+double media = st2.average().getAsDouble();
+
+[7]: //concatena stringhe mettendo virgole (non alla fine)
+Stream<Integer> st1 = Stream.of(new Integer[]{1, 2, 54, 23, 12, -4, 22} );
+String res = st1.map(Object::toString).collect(Collectors.joining(", "));
+
+[8]: //ottenere la media della lunghezza delle parole di un array di stringhe
+String[] array = { "ciao", "bravi", "ragazzi" };
+Stream<String> stP = Stream.of(array);
+double average = stP.collect(Collectors.averagingInt(String::length));
+
+[9]: //creare una mappa composta da CodiceFiscale e Nome
+(listaPersone è una List<Persona>);
+Map<String, String> mappa1 = listaPersone.stream().collect( Collectors.toMap(Persona::getCodFisc,Persona::getNome) );
+

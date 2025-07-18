@@ -1,0 +1,38 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+ 
+    
+    Servono a legare più classi (anche completamente diverse) da un concetto in comune.
+    Si potrà poi richiedere solo quel requisito (per esempio) per essere parametro di una funzione.
+
+    Le interfacce devono soltanto dichiarare metodi o constanti.
+
+
+
+    --esempio:
+
+        public interface Rettangolo(){
+            public double larghezza();
+            public double lunghezza();
+        }
+
+        public class Libro implements Rettangolo {
+	    ...
+	}
+
+	// Non centrano nulla tra loro, ma hanno la caratteristica "forma" uguale
+
+	public class CampoDaCalcio implements Rettangolo {
+	    ...
+	}
+
+	// Dovrò all'interno queste due classi definire tutto quello che mi è stato imposto
+        // dall'interfaccia con un @Override, come avessi fatto una promessa da mantenere
+
+        // sul main però per esempio...
+
+        Rettangolo r = new Libro(...);
+        System.out.println( r.larghezza() );   // Funzia!

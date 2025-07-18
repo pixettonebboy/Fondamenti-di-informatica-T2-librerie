@@ -1,0 +1,988 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+
+---------------------------------------USER INTERFACE----------------------------------------------------------
+
+ESEMPIO GRAFICA CON VBOX, LABEL: 2 DATEPICKER 1 BOTTONE E 2 TEXTFIELDS (con myHandler e error):
+
+public class CityParkingPane extends BorderPane {
+
+	private TextArea outputArea;
+	private Controller controller;
+	private Button calcButton;
+	private VBox leftPane, centerPane, bottomPane;
+	private DatePicker startPicker, endPicker;
+	private TextField startTime, endTime;
+	
+	public CityParkingPane(Controller controller) {
+		this.controller = controller;
+		Insets insets = new Insets(10);
+		//
+		leftPane = new VBox();
+		leftPane.setPrefWidth(150);
+		leftPane.getChildren().add(new Label(" Inizio sosta: "));
+		//
+		// DA FARE: creazione e configurazione DatePicker di inizio sosta
+		// DA FARE: creazione e configurazione campo di testo per orario di inizio sosta (formato italiano short HH:MM)
+		// NB: entrambi devono essere impostati a data e ora correnti
+		//
+		DateTimeFormatter tformatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.ITALY);
+		startPicker = new DatePicker();
+		startTime = new TextField();
+		startPicker.setValue(LocalDate.now());
+		startTime.setText(LocalTime.now().format(tformatter));
+		
+		leftPane.getChildren().addAll(startPicker,startTime);
+		this.setLeft(leftPane);
+		BorderPane.setMargin(leftPane, insets);
+		//
+		centerPane = new VBox();
+		centerPane.setPrefWidth(150);
+		centerPane.getChildren().add(new Label(" Fine sosta: "));
+		//
+		// DA FARE: creazione e configurazione DatePicker di fine sosta
+		// DA FARE: creazione e configurazione campo di testo per orario di fine sosta (formato italiano short HH:MM)
+		// NB: entrambi devono essere impostati a data e ora correnti
+		//
+		
+		endPicker = new DatePicker();
+		endTime = new TextField();
+		endPicker.setValue(LocalDate.now());
+		endTime.setText(LocalTime.now().format(tformatter));
+		
+		centerPane.getChildren().addAll(endPicker,endTime);
+		this.setCenter(centerPane);
+		BorderPane.setMargin(centerPane, insets);
+		//
+		bottomPane = new VBox();
+		var buttonBox = new HBox();
+		buttonBox.setAlignment(Pos.CENTER);
+		calcButton = new Button("Calcola costo");
+		//
+		// DA FARE: aggancio ascoltatore degli eventi
+		//
+		calcButton.setOnAction(this::calcolaCosto);
+
+		buttonBox.getChildren().add(calcButton);
+		bottomPane.getChildren().add(buttonBox);
+		outputArea = new TextArea();
+		outputArea.setEditable(false);
+		outputArea.setPrefHeight(100);
+		outputArea.setFont(Font.font("Courier New", FontWeight.BOLD, 12));
+		outputArea.setText("");
+		bottomPane.getChildren().addAll(new Label(" Costo sosta: "), outputArea);
+		this.setBottom(bottomPane);
+		BorderPane.setMargin(bottomPane, insets);
+	}
+
+	private void calcolaCosto(ActionEvent event) {
+		try {
+			Ricevuta ricevuta = controller.calcolaSosta(startPicker.getValue(), startTime.getText(), endPicker.getValue(),endTime.getText());
+			outputArea.setText(ricevuta.toString());
+		} catch (BadTimeIntervalException e) {
+			Controller.alert("Formato orario errato", "Uno degli orari specificati è errato", "L'orario non ha il formato HH:MM");
+
+		} catch (BadTimeFormatException e) {
+			Controller.alert("Errore", "Impossibile tornare indietro nel tempo", "L'orario di fine sosta precede quello di inizio sossta");
+		}
+
+
+
+		
+	}
+
+}
+
+------------------------------------------------
+ESEMPIO GHIGLIOTTINA
+
+
+public class OuterGhigliottinaPanel extends BorderPane {
+ 
+	private GhigliottinaPanel gPanel;
+	private TextField txtRispostaUtente, txtRispostaEsatta;
+	private Label rightLabel, leftLabel;
+	private Button svela;
+	private String rispostaEsatta;
+	private Controller controller;
+	private Ghigliottina gh;
+	private int montepremi;
+	
+	public OuterGhigliottinaPanel(int montepremi, Controller controller) {
+		this.controller=controller;
+		this.montepremi=montepremi;
+		setupGhigliottinaPanel();
+		//
+		VBox rightBox = new VBox();
+		rightBox.setPrefHeight(50);
+		rightBox.setPrefWidth(140);
+		txtRispostaUtente = new TextField();
+		txtRispostaUtente.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+		rightLabel = new Label("La tua risposta:");
+		rightLabel.setTextFill(Color.WHITE);
+		rightLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+		rightBox.getChildren().addAll(rightLabel, txtRispostaUtente);
+		VBox.setMargin(rightLabel, new Insets(10, 10, 10, 10));
+		VBox.setVgrow(txtRispostaUtente, Priority.ALWAYS);
+		//
+		VBox leftBox  = new VBox();
+		leftBox.setPrefHeight(50);
+		leftBox.setPrefWidth(140);
+		leftLabel = new Label("La parola segreta:");
+		leftLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 14));
+		leftLabel.setTextFill(Color.WHITE);
+		txtRispostaEsatta = new TextField();
+		txtRispostaEsatta.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+		txtRispostaEsatta.setDisable(true);
+		txtRispostaEsatta.setStyle("-fx-opacity: 0.9;");
+		leftBox.getChildren().addAll(leftLabel, txtRispostaEsatta);
+		VBox.setMargin(leftLabel, new Insets(10, 10, 10, 10));
+		VBox.setVgrow(txtRispostaEsatta, Priority.ALWAYS);
+		//
+		HBox revealBox = new HBox();
+		revealBox.setAlignment(Pos.CENTER);
+		revealBox.setStyle("-fx-background-color: blue;");
+		svela = new Button("SVELA"); 
+		svela.setStyle("-fx-background-color: white;");
+		svela.setTextFill(Color.RED);
+		svela.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+		svela.setOnAction(this::svela);
+		svela.setPrefHeight(60);
+		revealBox.getChildren().addAll(leftBox,rightBox,svela);
+		this.setTop(revealBox);
+	}
+	
+	private void setupGhigliottinaPanel() {
+		// initial setup
+		gh = controller.sorteggiaGhigliottina();
+		this.rispostaEsatta=gh.getRispostaEsatta();
+		gPanel = new GhigliottinaPanel(montepremi, gh.getTerne());
+		this.setBottom(gPanel);
+	}
+	
+	private void reset() {
+		setupGhigliottinaPanel();
+		txtRispostaUtente.setText("");
+		txtRispostaEsatta.setText("");
+	}
+	
+	private void svela(ActionEvent e) {
+		String rispostaUtente = txtRispostaUtente.getText();
+		if (rispostaUtente==null || rispostaUtente.isBlank()) {
+			alert("Errore", "Risposta mancante", "Non hai scritto alcuna parola valida!");
+			return;
+		}
+		txtRispostaEsatta.setText(rispostaEsatta);
+		boolean result = rispostaEsatta.trim().equalsIgnoreCase(rispostaUtente.trim());
+		info("Risultato", (result ? "HAI VINTO!" : "RISPOSTA SBAGLIATA :("),
+				(result ? "Montepremi: " : "Purtroppo hai perso ") + gPanel.montepremiAsString());
+		reset();
+	}
+
+	public static void alert(String title, String headerMessage, String contentMessage) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle(title);
+		alert.setHeaderText(headerMessage);
+		alert.setContentText(contentMessage);
+		alert.showAndWait();
+	}
+	
+	public static void info(String title, String headerMessage, String contentMessage) {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle(title);
+		alert.setHeaderText(headerMessage);
+		alert.setContentText(contentMessage);
+		alert.showAndWait();
+	}
+
+}
+
+----------------------------------------
+ESEMPIO CON LISTVIEW E GRAFICO A TORTA
+
+public class MainPane extends BorderPane {
+	
+	private Controller controller;
+	private ListView<Movimento> listView;
+	private TextField txtSaldoCorrente, txtDataCorrente, txtTotAccrediti, txtTotAddebiti;
+	private PieChart chart;
+	private LocalDate dataCorrente;
+	private DateTimeFormatter dateFormatter;
+	private NumberFormat currencyFormatter;
+	
+	public MainPane(Controller controller) {
+		this.controller=controller;
+		// *** DA COMPLETARE - PARTE 1 ***
+		// *** configurazione iniziale dei formattatori di valuta e data e della data corrente
+		// ***
+		//
+		// ----- top box -----
+		currencyFormatter = NumberFormat.getCurrencyInstance(Locale.ITALY);
+		dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(Locale.ITALY);
+		HBox topBox = new HBox(10);
+		topBox.setPrefWidth(400);
+		topBox.getChildren().addAll(new Label("Conto corrente n° " + this.controller.ccId()) );
+		topBox.getChildren().addAll(new Label("Intestatario: " + this.controller.ccIntestatario()) );
+		this.setTop(topBox);		
+		// ----- left box -----
+		listView = new ListView<>();
+		listView.setItems(FXCollections.observableArrayList(this.controller.movimenti()));		
+		listView.setPrefWidth(500);
+		listView.setPrefHeight(listView.getItems().size()*24+ 2);
+		this.setLeft(listView);	
+		// *** DA COMPLETARE - PARTE 2 ***
+		//	l’aggancio alla ListView dell’opportuno listener incapsulato nel metodo ausiliario myHandler
+		// ***
+		//
+		// ----- right box -----
+		listView.getSelectionModel().selectedItemProperty().addListener( (obs,oV,nV) -> myHandler(nV) );
+		VBox rightBox = new VBox(10);
+		rightBox.setPrefWidth(300);
+			//---
+			txtDataCorrente = new TextField();
+			txtDataCorrente.setEditable(false);
+			txtDataCorrente.setMaxWidth(70);
+			//---
+			txtSaldoCorrente = new TextField();
+			txtSaldoCorrente.setEditable(false);
+			txtSaldoCorrente.setMaxWidth(150);
+			txtSaldoCorrente.setAlignment(Pos.CENTER_RIGHT);
+			//---
+			txtTotAccrediti = new TextField();
+			txtTotAccrediti.setEditable(false);
+			txtTotAccrediti.setMaxWidth(100);
+			txtTotAccrediti.setAlignment(Pos.CENTER_RIGHT);
+			//---
+			txtTotAddebiti = new TextField();
+			txtTotAddebiti.setEditable(false);
+			txtTotAddebiti.setMaxWidth(100);
+			txtTotAddebiti.setAlignment(Pos.CENTER_RIGHT);
+			//---
+			HBox miniBoxData = new HBox(10);
+			txtDataCorrente.setText(dateFormatter.format(dataCorrente));
+			miniBoxData.getChildren().addAll(new Label("Dati al"), txtDataCorrente);
+			rightBox.getChildren().addAll(miniBoxData);
+			//---		
+			HBox miniBoxAccrediti = new HBox(10);
+			miniBoxAccrediti.getChildren().addAll(new Label("Totale accrediti"), txtTotAccrediti);
+			rightBox.getChildren().addAll(miniBoxAccrediti);
+			//---		
+			HBox miniBoxAddebiti = new HBox(10);
+			miniBoxAddebiti.getChildren().addAll(new Label("Totale addebiti"), txtTotAddebiti);
+			rightBox.getChildren().addAll(miniBoxAddebiti);
+			//---
+			HBox miniBoxSaldo = new HBox(10);
+			miniBoxSaldo.getChildren().addAll(new Label("Saldo"), txtSaldoCorrente);
+			rightBox.getChildren().addAll(miniBoxSaldo);
+			//---		
+			double totaleAddebiti  = controller.getTotale(dataCorrente, Tipologia.ADDEBITO);
+			double totaleAccrediti = controller.getTotale(dataCorrente, Tipologia.ACCREDITO);
+			chart = makePieChart(totaleAccrediti,totaleAddebiti);
+			rightBox.getChildren().addAll(chart);
+		this.setRight(rightBox);
+	}
+
+	private void myHandler(Movimento newMov) {
+		// *** DA FARE - PARTE 3 ***
+		// logica di gestione dell’evento
+		// - recuperare dal movimento selezionato la data contabile da utilizzare e impostarla nell’apposito campo di testo, 
+		//   opportunamente formattata
+		// - utilizzare tale data per recuperare dal controller i vari dati (saldo, totale accrediti e addebiti) e mostrarli, 
+		//   opportunamente formattati, negli appositi campi di testo
+		// - aggiornare il grafico a torta, ricalcolandolo coi nuovi totali accrediti e addebiti appena ottenuti
+		LocalDate dataContabile = newMov.getDataContabile();
+		txtDataCorrente.setText(dataContabile.format(dateFormatter));
+		double saldo = controller.saldoAl(dataContabile);
+		double totale_acc = controller.getTotale(dataContabile, Tipologia.ACCREDITO);
+		double totale_add = controller.getTotale(dataContabile, Tipologia.ADDEBITO);
+		this.txtSaldoCorrente.setText(currencyFormatter.format(saldo));
+		this.txtTotAccrediti.setText(currencyFormatter.format(totale_acc));
+		this.txtTotAddebiti.setText(currencyFormatter.format(totale_add));
+		chart.setData(FXCollections.observableArrayList(
+				new PieChart.Data("Accrediti", totale_acc),
+				new PieChart.Data("Addebiti", -totale_add)
+			));
+	}
+
+	private PieChart makePieChart(double totaleAccrediti, double totaleAddebiti) {
+		// DA FARE - PARTE 4
+		// costruzione del grafico a torta, di dimensioni 250x250
+		 chart = new PieChart(FXCollections.observableArrayList(
+					new PieChart.Data("Accrediti", totaleAccrediti),
+					new PieChart.Data("Addebiti", -totaleAddebiti)
+				));
+		 chart.setPrefSize(250, 250);
+			chart.setLabelsVisible(false);
+		return chart; // (fake)
+	}
+	
+}
+------------------------
+//ESEMPIO CON TOGGLE GROUP FONDAMENTALE (ANCHE ALTRI ELEMENTI)
+public class MainPane extends BorderPane {
+	
+	private Controller controller;
+	private ComboBox<String> clientiCombo;
+	private ComboBox<Currency> currencyCombo;
+	private TextArea area;
+	private String idCliente;
+	private TextField txtGalleons, txtSickles, txtKnuts, txtMoney;
+	private NumberFormat formatter;
+	private RadioButton coinButton, currencyButton;
+	private ToggleGroup tg;
+	private Button preleva;
+
+	public MainPane(Controller controller) {
+		this.controller=controller;
+		formatter = NumberFormat.getInstance(Locale.ITALY);
+		formatter.setMaximumFractionDigits(2);
+		formatter.setMinimumFractionDigits(2);
+		//
+		VBox topVBox = new VBox();
+		topVBox.setPrefHeight(200);
+			HBox miniBoxTitolo = new HBox(); miniBoxTitolo.setAlignment(Pos.CENTER);
+			Label titolo = new Label("Gringott ATM");
+			titolo.setStyle("-fx-font-weight: bold");
+			miniBoxTitolo.getChildren().addAll(titolo);
+			topVBox.getChildren().addAll(new Label("  "), miniBoxTitolo, new Label("  "));
+			// ----------- radio buttons ----------------
+			coinButton =     new RadioButton("Monete Gringott"); 
+			coinButton.setStyle("-fx-font-weight: bold");
+			currencyButton = new RadioButton("Altre valute         "); 
+			currencyButton.setStyle("-fx-font-weight: bold");
+			// ----------- radio button group -----------
+			tg = new ToggleGroup();
+			coinButton.setToggleGroup(tg);
+			currencyButton.setToggleGroup(tg);		
+			tg.selectToggle(coinButton);
+			coinButton.setOnAction(this::coinButtonHandle);
+			currencyButton.setOnAction(this::currencyButtonHandle);
+			// ----------- clienti combo  -----------
+			clientiCombo = new ComboBox<String>(FXCollections.observableArrayList(controller.getClients()));
+			HBox miniBoxClienti = new HBox(); miniBoxClienti.setAlignment(Pos.CENTER_LEFT);
+			Label clienti = new Label("  Cliente:   ");
+			clienti.setStyle("-fx-font-weight: bold");
+			miniBoxClienti.getChildren().addAll(clienti, clientiCombo);
+			topVBox.getChildren().addAll(new Label("  "), miniBoxClienti, new Label("  "));
+			// ----------- monete Gringott  -----------
+			HBox miniBoxGringott = new HBox(); miniBoxGringott.setAlignment(Pos.CENTER_LEFT);			
+			miniBoxGringott.getChildren().addAll(coinButton, new Label("   "));
+			txtGalleons = new TextField("0"); txtGalleons.setFont(Font.font("Courier New", FontWeight.BOLD, 11));
+			txtSickles = new TextField("0");  txtSickles.setFont(Font.font("Courier New", FontWeight.BOLD, 11));
+			txtKnuts = new TextField("0");    txtKnuts.setFont(Font.font("Courier New", FontWeight.BOLD, 11));
+			txtGalleons.setAlignment(Pos.CENTER_RIGHT); txtGalleons.setPrefWidth(50);
+			txtSickles.setAlignment(Pos.CENTER_RIGHT);  txtSickles.setPrefWidth(50);
+			txtKnuts.setAlignment(Pos.CENTER_RIGHT);    txtKnuts.setPrefWidth(50);
+			miniBoxGringott.getChildren().addAll(
+					txtGalleons, new Label(" "), new Label(Coin.GALLEON.getName()), new Label(" "), 
+					txtSickles, new Label(" "), new Label(Coin.SICKLE.getName()), new Label(" "), 
+					txtKnuts, new Label(" "), new Label(Coin.KNUT.getName()), new Label(" ")
+					);
+			topVBox.getChildren().addAll(miniBoxGringott);
+			// ----------- valute umane -----------
+			HBox miniBoxAltreValute = new HBox(); miniBoxAltreValute.setAlignment(Pos.CENTER_LEFT);
+			miniBoxAltreValute.getChildren().addAll(currencyButton,new Label("   "));
+			txtMoney = new TextField("0"); txtMoney.setFont(Font.font("Courier New", FontWeight.BOLD, 11));
+			txtMoney.setAlignment(Pos.CENTER_RIGHT); txtMoney.setPrefWidth(50);
+			txtMoney.setEditable(false);
+			currencyCombo = new ComboBox<Currency>(FXCollections.observableArrayList(Currency.values()));
+			miniBoxAltreValute.getChildren().addAll(txtMoney, new Label(" "), currencyCombo);
+			topVBox.getChildren().addAll(miniBoxAltreValute);
+			// ----------- pulsante PRELEVA -----------
+			HBox miniBoxPreleva = new HBox(); miniBoxPreleva.setAlignment(Pos.CENTER);
+			preleva = new Button("Preleva");
+			preleva.setStyle("-fx-font-weight: bold");
+			preleva.setOnAction(this::myHandle);
+			miniBoxPreleva.getChildren().addAll(preleva);
+			topVBox.getChildren().addAll(new Label(" "), miniBoxPreleva);
+			this.setTop(topVBox);
+		VBox bottomVBox = new VBox();
+			bottomVBox.setPrefHeight(200);
+			area = new TextArea();
+			area.setPrefSize(580,200);
+			area.setFont(Font.font("Courier New", FontWeight.NORMAL, 11));
+			area.setEditable(false);
+			Label esito = new Label("Esito del prelievo:");
+			esito.setStyle("-fx-font-weight: bold");
+			bottomVBox.getChildren().addAll(esito, area);
+		this.setBottom(bottomVBox);
+	}
+	
+	private void myHandle(ActionEvent ev) {
+		idCliente = clientiCombo.getValue();
+		if(idCliente==null) {
+			Controller.alert("Errore di selezione", "Cliente sconosciuto", "Non è stato selezionato alcun cliente " + idCliente);
+			return;
+		}
+		Optional<Amount> autorizzato = Optional.empty();
+		try {
+			if (tg.getSelectedToggle()==coinButton) {
+				int galleons = Integer.parseInt(txtGalleons.getText());
+				int sickles = Integer.parseInt(txtSickles.getText());
+				int knuts = Integer.parseInt(txtKnuts.getText());
+				autorizzato = Optional.of(controller.withdraw(idCliente, galleons,sickles,knuts));			
+			}
+			else if (tg.getSelectedToggle()==currencyButton) {
+				int money = Integer.parseInt(txtMoney.getText());
+				Currency currency = currencyCombo.getValue();
+				if(currency==null) {
+					Controller.alert("Errore di selezione", "Valuta mancante", "occorre specificare la valuta");
+				}
+				else {
+					autorizzato = Optional.of(controller.withdraw(idCliente, money, currency));	
+				}
+			}
+		}
+		catch(NumberFormatException e) {
+			Controller.alert("Errore di formato numerico", "Numero non intero", "le quantità di monete devono essere intere");
+		}	
+		catch(ImpossibleWithdrawException e) {
+			Controller.alert("Errore nel prelievo", "Prelievo non autorizzato", e.getMessage());
+			area.setText(e.getMessage());
+		}	
+		area.setText("Prelievo del cliente " + idCliente + (autorizzato.isPresent() ? "" : " non") + " autorizzato\n");
+		if(autorizzato.isPresent()) {
+			area.appendText("Importo erogato:\n" + autorizzato.get());
+		}
+	}
+	
+	private void coinButtonHandle(ActionEvent ev) {
+		txtMoney.setEditable(false); txtMoney.setText("0");
+		txtGalleons.setEditable(true); txtSickles.setEditable(true); txtKnuts.setEditable(true);
+	}
+
+	private void currencyButtonHandle(ActionEvent ev) {
+		txtGalleons.setEditable(false); txtSickles.setEditable(false); txtKnuts.setEditable(false);
+		txtGalleons.setText("0"); txtSickles.setText("0"); txtKnuts.setText("0"); 
+		txtMoney.setEditable(true);
+	}
+	
+}
+------------------------
+ESEMPIO CON COMBOBOX, TOGGLEGROUP, COMPARATORI E STREAM
+
+public class MainPane extends BorderPane {
+	
+	private TextArea outputArea; 
+	private ComboBox<String> comboFrom, comboTo;
+	private Controller controller;
+	private RadioButton b1, b2;
+	private ToggleGroup tg;
+
+	public MainPane(Controller controller) {
+		this.controller=controller;
+		//
+		HBox topBox = new HBox();
+		topBox.setPrefHeight(40);
+		// populate combos
+		comboFrom = new ComboBox<>(); populateCombo(comboFrom);
+		comboTo   = new ComboBox<>(); populateCombo(comboTo);
+		comboFrom.setOnAction(this::reset);
+		comboTo.setOnAction(this::reset);
+		topBox.getChildren().addAll(new Label("Partenza "), comboFrom, new Label("  Arrivo "), comboTo);
+		this.setTop(topBox);
+		//
+		HBox centerBox = new HBox();
+		centerBox.setPrefHeight(80);
+		centerBox.setAlignment(Pos.CENTER);
+		b1 = new RadioButton("per distanza");
+		b2 = new RadioButton("per durata");
+		tg = new ToggleGroup();
+		b1.setToggleGroup(tg);
+		b2.setToggleGroup(tg);
+		centerBox.getChildren().addAll(new Label("Ordina soluzioni:    "), b1, new Label("   "), b2);
+		this.setCenter(centerBox);
+		//
+		b1.setOnAction(e -> showSorted(OrderType.BY_DISTANCE)); 
+		b2.setOnAction(e -> showSorted(OrderType.BY_DURATION)); 
+		//
+		outputArea = new TextArea();
+		outputArea.setPrefSize(500,400);
+		this.setBottom(outputArea);
+	}
+
+	private void populateCombo(ComboBox<String> combo) {
+		List<String> lista = controller.getStationNames();
+		combo.setItems(FXCollections.observableArrayList(lista));
+	}
+	
+	private void reset(ActionEvent event) {
+		outputArea.setText("");
+		if(tg.getSelectedToggle()!=null) tg.getSelectedToggle().setSelected(false);
+		
+	}
+	
+	private void showSorted(OrderType orderType) {
+		List<Route> lista = controller.getRoutes(comboFrom.getValue(), comboTo.getValue());
+		Comparator<Route> distanza = Comparator.comparing(controller :: getRouteDuration);
+		Comparator<Route> lunghezza = Comparator.comparing(Route :: getLength); 
+		if(orderType.equals(OrderType.BY_DISTANCE)) {
+			lista.sort(distanza);
+		}
+		else lista.sort(lunghezza);
+		for (Route r : lista) {
+			outputArea.setText(lista.stream().map(this::toRouteString).collect(Collectors.joining(System.lineSeparator()+System.lineSeparator())));
+		}
+	}
+	
+	private String toRouteString(Route route) {
+		DateTimeFormatter TformatterShort = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT); 
+		Duration durata = controller.getRouteDuration(route);
+		String tempo = LocalTime.of(durata.toHoursPart(), durata.toMinutesPart()).format(TformatterShort);
+		String s = "Durata: " + tempo;
+		return route.toString() +"\n"+s;
+	}
+
+}
+
+
+-----------------------------------
+
+public MainPane(Controller controller) {
+		this.controller=controller;
+		formatter = NumberFormat.getInstance(Locale.ITALY);
+		formatter.setMaximumFractionDigits(2);
+		formatter.setMinimumFractionDigits(2);
+		//
+		VBox leftBox = new VBox();
+		leftBox.setPrefWidth(200);
+			HBox miniBoxIniziale = new HBox(); miniBoxIniziale.setAlignment(Pos.CENTER);
+			Label titolino = new Label("Carriere studenti");
+			titolino.setStyle("-fx-font-weight: bold");
+			miniBoxIniziale.getChildren().addAll(titolino);
+			leftBox.getChildren().addAll(new Label("  "), miniBoxIniziale, new Label("  "));
+			//
+			carriereCombo = new ComboBox<>(FXCollections.observableArrayList(this.controller.getListaIdCarriere()));
+			carriereCombo.setTooltip(new Tooltip("Scegliere la carriera da visualizzare"));
+			carriereCombo.setPrefWidth(175);
+			leftBox.getChildren().addAll(new Label(" Scelta carriera:  "), carriereCombo);
+			carriereCombo.setOnAction(this::myHandle);
+			//
+			funzioniCombo = new ComboBox<>(FXCollections.observableArrayList(this.controller.elencoFunzioni()));
+			funzioniCombo.setPrefWidth(175);
+			funzioniCombo.getSelectionModel().selectFirst();
+			leftBox.getChildren().addAll(new Label(" Funzione di decadimento:  "), funzioniCombo);
+			funzioniCombo.setOnAction(this::myHandle);
+			//
+			picker = new DatePicker(LocalDate.of(2020,01,01));
+			picker.setPrefWidth(175);
+			leftBox.getChildren().addAll(new Label(" Attualizzare al:  "), picker);
+			picker.setOnAction(this::myHandle);
+			//
+			txtMediaPesata = new TextField();
+			txtCreditiAcquisiti = new TextField();
+			txtMediaPesata.setFont(Font.font("Courier New", FontWeight.BOLD, 11));
+			txtCreditiAcquisiti.setFont(Font.font("Courier New", FontWeight.BOLD, 11));
+			txtMediaPesata.setAlignment(Pos.CENTER_RIGHT);
+			txtMediaPesata.setMaxWidth(175);
+			txtCreditiAcquisiti.setAlignment(Pos.CENTER_RIGHT);
+			txtCreditiAcquisiti.setMaxWidth(175);
+			txtMediaPesata.setEditable(false);
+			txtCreditiAcquisiti.setEditable(false);
+			leftBox.getChildren().addAll(new Label(" Media pesata attualizzata:  "), txtMediaPesata);
+			leftBox.getChildren().addAll(new Label(" Crediti acquisiti:  "), txtCreditiAcquisiti);
+			this.setLeft(leftBox);
+		VBox rightBox = new VBox();
+			rightBox.setPrefWidth(580);
+			area = new TextArea();
+			area.setPrefSize(580,500);
+			area.setFont(Font.font("Courier New", FontWeight.NORMAL, 11));
+			area.setEditable(false);
+			rightBox.getChildren().addAll(area);
+		this.setRight(rightBox);
+	}
+	
+	private void myHandle(ActionEvent ev) {
+		idCarriera = carriereCombo.getValue();
+		var carriera = this.controller.getCarriera(idCarriera);
+		var funzione = controller.getFunction(funzioniCombo.getValue());
+		var data = picker.getValue();
+		area.setText("Carriera base:\n" + carriera.toString());
+		this.controller.setCarriera(idCarriera);
+		this.controller.setFunction(funzione);
+		this.controller.setDataDiAttualizzazione(data);
+		area.appendText("\n\nCarriera attualizzata:\n" + this.controller.toString());
+		txtMediaPesata.setText(formatter.format(this.controller.getMediaPesata())+"/30");
+		txtCreditiAcquisiti.setText(formatter.format(this.controller.getCreditiAcquisiti(idCarriera))+"/180");
+	}
+	
+}
+
+---------------------------------------------
+
+public class MainPane extends BorderPane {
+	
+	private Controller controller = null;
+
+	private TextArea output;
+	private ComboBox<FasciaEta> fasceEta;
+	private ComboBox<Impressionabilita> impressionabilita;
+	private Button genera, stampa;
+	
+	public MainPane(Controller controller) {
+		this.controller = controller;
+		initPane();
+	}
+
+	private void initPane() {
+
+		output = new TextArea();
+		output.setEditable(false);
+		output.setWrapText(true);
+
+		VBox panel = new VBox(2);
+		{
+			panel.setSpacing(10);
+			panel.setPadding(new Insets(0, 20, 10, 20));
+			// ---------------------
+			panel.getChildren().add(new Label("Fascia d'età del bambino: "));
+			fasceEta = new ComboBox<>(FXCollections.observableArrayList(controller.getFasceEta()));
+			fasceEta.setEditable(false);
+			fasceEta.getSelectionModel().selectLast();
+			panel.getChildren().add(fasceEta);
+			// ---------------------
+			panel.getChildren().add(new Label("Grado di impressionabilità: "));
+			impressionabilita = new ComboBox<>(FXCollections.observableArrayList(controller.getLivelliImpressionabilita()));
+			impressionabilita.setEditable(false);
+			impressionabilita.getSelectionModel().selectFirst();
+			panel.getChildren().add(impressionabilita);
+			// ---------------------
+			panel.getChildren().add(new Label("Favola generata: "));
+			panel.getChildren().add(output);
+			// ---------------------
+			genera = new Button("Genera favola");
+			genera.setAlignment(Pos.BASELINE_RIGHT);
+			genera.setOnAction(this::genTale);
+			panel.getChildren().add(genera);
+			// ---------------------
+			stampa = new Button("Stampa su file");
+			stampa.setAlignment(Pos.BASELINE_RIGHT);
+			stampa.setDisable(true);
+			stampa.setOnAction(this::printToFile);
+			panel.getChildren().add(stampa);
+		}
+		this.setCenter(panel);
+
+	}
+
+	private void printToFile(ActionEvent e) {
+		try (PrintWriter pw = new PrintWriter(controller.getOutputFileName())) {
+			if (output.getText().trim().isEmpty()) {
+				Controller.alert("Attenzione", "Non c'è alcun testo da salvare", "Generare prima una favola");
+				return;
+			}
+			pw.println(output.getText().trim());
+			stampa.setDisable(true);
+		} catch (FileNotFoundException e1) {
+			Controller.alert("Errore", "Impossibile aprire il file " + controller.getOutputFileName() + " in scrittura", "Verificare nome e posizione");
+		}
+	}
+	
+	private void genTale(ActionEvent e) {
+		Impressionabilita livelloImpressionabilita = impressionabilita.getValue();
+		FasciaEta eta = fasceEta.getValue();
+		Optional<Favola> favola = controller.generaFavola(eta, livelloImpressionabilita);
+		output.setText(favola.isPresent() ? favola.get().toString() : "impossibile generare una favola coi vincoli richiesti");
+		stampa.setDisable(false);
+	}
+
+}
+
+--------------------------------------------------------
+ESERCIZIO CON GRAFICA DA 0 + COLOR RANDOMIZZATO
+
+
+public class MiniRailPane extends BorderPane {
+
+	private TextArea output;
+	private Button clock, moving, stopping;
+	private Controller controller;
+	private Label label;
+	private Map<Train,Color> trainColors;
+	
+	public MiniRailPane(Controller controller, double[] trainPositions) {
+		this.controller=controller;
+		//
+		trainColors = new HashMap<>();
+		drawTrainColors(trainColors);
+		//
+		HBox topPane = new HBox(5);
+		moving = new Button("Move trains");
+		stopping = new Button("Stop trains");
+		label = new Label("Trains are now " + TrainStatus.STOPPED);
+		topPane.getChildren().addAll(moving, stopping, label);
+		moving.setOnAction(this::moveTrains);
+		stopping.setOnAction(this::stopTrains);
+		this.setTop(topPane);
+		//
+		output = new TextArea();
+		output.setWrapText(true);
+		output.setPrefColumnCount(10);
+		output.setPrefRowCount(20);
+		output.setFont(Font.font("Courier New", FontWeight.NORMAL, 12));
+		//
+		this.setBottom(output);
+		//
+		HBox rightPane = new HBox();
+		clock = new Button("Clock");
+		rightPane.getChildren().add(clock);
+		clock.setOnAction(this::advanceClock);
+		//
+		this.setRight(rightPane);
+		//		
+		setupTrainPanel(trainPositions);
+	}
+	
+	private void drawTrainColors(Map<Train, Color> trainColors) {
+		for (Train t: this.controller.getTrains()) {
+			trainColors.put(t,randomColor());
+		}
+	}
+
+	private void advanceClock(ActionEvent e) {
+		controller.clock(0.5);
+		output.setText(controller.getLog());
+		updateTrainPanel();
+	}
+
+	private void moveTrains(ActionEvent e) {
+		for (Train t: this.controller.getTrains())
+			this.controller.setMoving(t);
+		label.setText("Trains are now " + TrainStatus.MOVING);
+	}
+
+	private void stopTrains(ActionEvent e) {
+		for (Train t: this.controller.getTrains())
+			this.controller.setStopped(t);
+		label.setText("Trains are now " + TrainStatus.STOPPED);
+	}
+	
+	private void setupTrainPanel(double[] trainPositions) {
+		TrainLinePane centerPane = new TrainLinePane(this.controller.getLine());
+		List<Train> trains = this.controller.getTrains();
+		for (int j=0; j<trains.size(); j++) {
+			Train t = trains.get(j);
+			boolean positioningOK = controller.getLineStatus().putTrain(t, trainPositions[j]);
+			if (positioningOK) { 
+				centerPane.drawTrain(trainPositions[j], t.getLength(), trainColors.get(t), t.getName());
+			}
+		}
+		this.setCenter(centerPane);
+	}
+	
+	private void updateTrainPanel() {
+		TrainLinePane centerPane = new TrainLinePane(this.controller.getLine());
+		for (Train t: this.controller.getTrains()) {
+			boolean positioningOK = controller.getLineStatus().putTrain(t, this.controller.getLineStatus().getTrainLocation(t));
+			if (positioningOK) { 
+				centerPane.drawTrain(this.controller.getLineStatus().getTrainLocation(t), t.getLength(), trainColors.get(t), t.getName());
+			}
+		}
+		this.setCenter(centerPane);
+	}
+
+	private Color randomColor() {
+        Random random = new Random();
+        int r = random.nextInt(255);
+        int g = random.nextInt(255);
+        int b = random.nextInt(255);
+        return Color.rgb(r,g,b);
+    }
+}
+
+
+-----------------------
+ESEMPIO TARIFFE BOLLETTE (FATTO SABATO 10/06/2023)  -- MAINPANE DA 0
+
+
+public class ElectricLifePane extends BorderPane {
+
+	private TextArea outputArea;
+	private TextField campoConsumo;
+	private Controller controller;
+	private Button buttonCalcola, buttonStampa;
+	private VBox leftPane;
+	private Bolletta bolletta;
+	private ComboBox<Tariffa> comboTariffe;
+	private DatePicker picker; 
+	
+	public ElectricLifePane(Controller controller) {
+		this.controller = controller;
+		//
+		leftPane = new VBox();
+		leftPane.getChildren().add(new Label("Tariffe disponibili"));
+		comboTariffe = new ComboBox<>(controller.getTariffe());
+		comboTariffe.setValue(comboTariffe.getItems().get(0));
+		leftPane.getChildren().add(comboTariffe);
+		//
+		leftPane.getChildren().add(new Label("Consumo in KWh"));
+		campoConsumo = new TextField();
+		campoConsumo.setPrefWidth(150);
+		campoConsumo.setFont(Font.font("Courier New", FontWeight.BOLD, 12));
+		campoConsumo.setAlignment(Pos.CENTER_RIGHT);
+		leftPane.getChildren().add(campoConsumo);
+		leftPane.getChildren().add(new Label("Data di emissione"));
+		//
+		picker = new DatePicker();
+		picker.setPrefWidth(250);
+		picker.setValue(LocalDate.now());
+		leftPane.getChildren().add(picker);
+		this.setLeft(leftPane);
+
+		outputArea = new TextArea();
+		outputArea.setEditable(false);
+		outputArea.setPrefWidth(600);
+		outputArea.setFont(Font.font("Courier New", FontWeight.BOLD, 12));
+		outputArea.setText("");
+		this.setRight(outputArea);
+		
+		buttonCalcola = new Button("Calcola");
+		buttonCalcola.setOnAction(this::calcolaBolletta);
+		TilePane commandPane = new TilePane();
+		commandPane.setAlignment(Pos.CENTER);
+		buttonStampa = new Button("Stampa");
+		buttonStampa.setDisable(true);
+		buttonStampa.setOnAction(this::stampaBolletta);
+		commandPane.getChildren().addAll(buttonCalcola, buttonStampa);
+		this.setBottom(commandPane);
+	}
+
+	private void calcolaBolletta(ActionEvent event) {
+		String consumoText = this.campoConsumo.getText();
+		try {
+			int consumo = Integer.parseInt(consumoText);
+			bolletta = controller.creaBolletta(	picker.getValue(), 
+											this.comboTariffe.getValue().getNome(), 
+											consumo);
+			outputArea.setText(bolletta.toString());
+			buttonStampa.setDisable(false);
+		}
+		catch(NumberFormatException e) {
+			Controller.alert("Errore formato numerico", "Consumo errato", "Il consumo in KWh dev essere un numero intero");
+			// bolletta immodificata
+		}
+	}
+
+	private void stampaBolletta(ActionEvent event) {
+		try (PrintWriter writer = new PrintWriter("Bolletta.txt")) {
+			BollettaWriter bollettaWriter = new MyBollettaWriter(writer);
+			controller.stampaBolletta(bolletta, bollettaWriter);
+			buttonStampa.setDisable(true);
+		} catch (FileNotFoundException e) {
+			Controller.alert("Errore di stampa", "Percorso non trovato", "Impossibile stampare la bolletta");
+		}
+	}
+
+}
+--------------------------
+private BarChart<String, Numbert> chart;
+
+private void disegnaGrafico() {
+		chartPane.getChildren().remove(chart);
+		// creazione nuovo chart
+		CategoryAxis asseOrizz = new CategoryAxis();	asseOrizz.setLabel("Prodotti");
+		NumberAxis asseVert = new NumberAxis();			asseVert.setLabel("% Qualità");
+		chart = new BarChart<>(asseOrizz,asseVert);
+		// popolamento
+		for (String desc : controller.getDescrizioni()){
+			XYChart.Series<String,Number> serie = new XYChart.Series<String,Number>();
+			serie.getData().add(new XYChart.Data<>(desc, 100*controller.getTabellaPercentuali().get(desc)));
+			chart.getData().add(serie);
+		}	
+		chart.setTitle("% prodotti entro standard qualità");
+		chart.setPrefWidth(600);
+		chart.setLegendVisible(false);
+		chartPane.getChildren().add(chart);
+	}
+
+
+
+------------------------------------
+
+
+public class RentABikePane extends BorderPane {
+
+	private TextArea outputArea;
+	private Controller controller;
+	private Button bottoneTicket;
+	private VBox leftPane, centerPane;
+	private ComboBox<String> combo; 
+	private DatePicker pickerInizio, pickerFine;
+	private TextField fieldInizio, fieldFine;
+	private DateTimeFormatter formatter;
+	
+	public RentABikePane(Controller controller) {
+		this.controller = controller;
+		formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.ITALY);
+		//
+		HBox topPane = new HBox();
+		ObservableList<String> nomiTariffe = this.controller.getCityNames();
+		combo = new ComboBox<>(nomiTariffe);
+		combo.setValue(nomiTariffe.get(0));
+		//
+		bottoneTicket = new Button("Calcola costo");
+		bottoneTicket.setStyle("-fx-background-color: red;");
+		bottoneTicket.setOnAction(this::calcolaCostoNoleggio);
+		//
+		topPane.getChildren().addAll(new Label("Città:  "), combo, new Label("        "), bottoneTicket);
+		this.setTop(topPane);
+		//
+		leftPane = new VBox();
+		leftPane.setPrefWidth(150);
+		leftPane.getChildren().add(new Label(" Inizio noleggio: "));
+		pickerInizio = new DatePicker(LocalDate.now()); 
+		fieldInizio = new TextField();
+		fieldInizio.setText(LocalTime.now().format(formatter));
+		fieldInizio.setPromptText("Inserire ora iniziale");
+		leftPane.getChildren().addAll(pickerInizio,fieldInizio);
+		this.setLeft(leftPane);
+		//
+		centerPane = new VBox();
+		centerPane.setPrefWidth(150);
+		centerPane.getChildren().add(new Label(" Fine noleggio: "));
+		pickerFine = new DatePicker(LocalDate.now()); 
+		fieldFine = new TextField();
+		fieldFine.setText(LocalTime.now().format(formatter));
+		fieldFine.setPromptText("Inserire ora finale");
+		centerPane.getChildren().addAll(pickerFine,fieldFine);
+		this.setCenter(centerPane);
+		//
+		outputArea = new TextArea();
+		outputArea.setEditable(false);
+		outputArea.setPrefWidth(250);
+		outputArea.setFont(Font.font("Courier New", FontWeight.BOLD, 12));
+		outputArea.setText("");
+		this.setRight(outputArea);
+	}
+
+	private void calcolaCostoNoleggio(ActionEvent event) {
+		String citta = this.combo.getValue();
+		if (citta==null) {
+			Controller.alert("Errore", "Impossibile reperire la tariffa", "Non è stata selezionata alcuna città");
+			this.outputArea.setText("");
+			return;
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.ITALY);
+		try {
+			LocalTime oraInizioSosta = LocalTime.parse(fieldInizio.getText(), formatter);
+			LocalTime oraFineSosta = LocalTime.parse(fieldFine.getText(), formatter );
+			LocalDate dataInizioSosta = pickerInizio.getValue();
+			LocalDate dataFineSosta = pickerFine.getValue();
+			if (oraInizioSosta.isAfter(oraFineSosta) || dataInizioSosta.isAfter(dataFineSosta)) {
+				Controller.alert("Errore", "Impossibile tornare indietro nel tempo", "La fine del noleggio precede l'inizio");
+				this.outputArea.setText("");
+				return;
+			}
+			double costo  = controller.getRentCost(citta, dataInizioSosta, oraInizioSosta, dataFineSosta, oraFineSosta); 
+			NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.ITALY);
+			this.outputArea.setText("Costo del noleggio " + currencyFormatter.format(costo));
+		}
+		catch (DateTimeParseException e){
+			Controller.alert("Errore di formato", "Errore nel formato orario", "L'orario di inizio e fine noleggio deve avere la forma HH:MM");
+			this.outputArea.setText("");
+		}
+	}
+
+
+}

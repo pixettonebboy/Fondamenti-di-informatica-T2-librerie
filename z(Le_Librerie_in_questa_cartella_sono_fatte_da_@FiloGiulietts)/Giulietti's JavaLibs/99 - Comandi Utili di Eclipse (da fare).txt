@@ -1,0 +1,9 @@
+
+
+>> PASSAGGI> CREARE FILE .JAR (DEPLOYMENT)
+
+>> PASSAGGI> AGGIUNGERE FX o JUNIT col BUildAppPath (non se sa mai)
+
+>> PASSAGGI e COMANDI> Manipolazione Argomenti del Main
+
+>> Source e Refactor (Non se sa mai)

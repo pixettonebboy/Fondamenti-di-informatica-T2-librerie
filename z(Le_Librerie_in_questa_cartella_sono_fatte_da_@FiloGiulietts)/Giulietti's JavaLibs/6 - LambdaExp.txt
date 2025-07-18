@@ -1,0 +1,193 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+
+    LINGUAGGI FUNZIONALI = 
+    Le funzioni diventano anch'esse dati, variabili, con la caratteristica di essere eseguibili.
+      – Assegnabile a variabili, di tipo "funzione da A a B"
+      – Passabile come argomento a un'altra funzione
+      – Definibile come ogni altro oggetto
+
+
+    Per crearle si usano le "Lambda Expressions":
+    E' una funzione anonima, espressa in modo simile alla notazione matematica:
+    
+    (lista argomenti) -> { corpo della funzione }      // esempio matematico:  x -> x+3   (da R in R)
+
+    il tipo della funzione sarà definito dal suo Dominio e Codominio:
+    --esempi:
+        >>  (int x, int y) -> 2*x-y       f: ZxZ → Z   «funzione a due argomenti dagli interi agli interi»
+        >>  (Counter c) -> c.getValue()   f: C → N     «funzione ad un argomento dall’insieme dei Counter ai naturali»
+        >>  (String s, int n) -> s+n      f: SxZ → S   «funzione a due argomenti, una stringa e un intero, a stringa»
+
+    
+    Modi per i linguaggi di distinguere le funzioni:
+
+    TIPO STRUTTURALE:
+    Distinti dalla struttura  es.  f: Z -> Z    (tipo «Z → Z»)
+
+    TIPO NOMINALE (Java):
+    Distinti da un nome:      es.  f: RxR -> R  (tipo RealToRealBiFunction)
+
+    Posso avere anche dominio vuoto:   DoubleSupplier f = () -> Math.sqrt(2);   «funzione che genera un valore reale»
+
+
+    --esempio d'uso:
+        IntUnaryOperator f = (int x) -> x+3;   // In posso specificarlo o no
+        int res = f.applyAsInt(3);
+
+        System.out.println(x -> x+1);
+
+
+
+
+
+>> VARIABILE DI UN METODO ESISTENTE
+
+        x -> x.getValue();
+
+        Se si limita a richiamare un metodo già esistente, si può usare una "Method Reference"
+            NomeClasse::nomeMetodo   equivale a     NomeClasse -> NomeClasse.nomeMetodo()
+
+        --esempio:
+           IntegerSupplier x = Counter::getValue();
+           System.out.println(x);   // ogni volta che scrivo x lui fa la getValue da counter
+
+
+
+
+
+>> DONARE CARATTERISTICHE RAPIDAMENTE (ES COMPARABLE)
+
+        Voglio fare una cosa del genere
+        Arrays.sort(persone, compare(…) );    Dove persone non è comparable, e non ho un comparator
+
+
+        --esempio:
+
+        1) Con Classe comparatrice (VECCHIO):
+            Arrays.sort(persone, new CognomeComparator() );
+
+        2) Con comparatore Anonimo (VECCHIO):
+            Arrays.sort(persone,
+                new Comparator<Persona>(){
+                    public int compare(Persona p1, Persona p2){
+                        return p1.getCognome().compareTo(p2.getCognome());
+                    }
+                }
+             );
+
+         3) NUOVO METODO: Lambda Expression
+             Arrays.sort(persone, (p1,p2) -> p1.getCognome().compareTo(p2.getCognome()) );
+             // Equivale ad un Comparatore anonimo
+
+         4) NUOVO METODO: Comparing Factory
+             Arrays.sort(persone, Comparator.comparing( Persona::getCognome );
+             //Crea un comparatore basandosi sul cognome
+
+
+         Si può anche fare per tipi primitivi e o per più livelli insieme (FluentInterface):
+
+            Arrays.sort(persone,
+                Comparator.comparing( Persona::getCognome )
+                .thenComparing( Persona::getNome )
+                .thenComparingInt( Persona::getEtà );
+
+
+
+
+
+>> REFERENCE A COSTRUTTORI
+
+    Posso fare riferimento anche ad un costruttore,
+    utili quando devo passare ad un'altra funzione "come costruire qualcosa"
+  
+    --esempio:
+      class Persona{
+          private String cognome, nome;
+          private int eta;
+          private boolean sex;
+
+          public Persona(String nome, String cognome, int eta, boolean sex){ ... }
+          public Persona(String nome, String cognome, int eta){ ... }
+          public Persona(String cognome, String nome){ ... }
+          public Persona(String cognome){ ... }
+          public Persona(){ ... }
+      }
+
+
+      Supplier<Persona> ctor0 = Persona::new;
+      Function<String,Persona> ctor1 = Persona::new;
+      BiFunction<String,String,Persona> ctor2 = Persona::new;
+    
+      // Per più di 2 argomenti mi serve un'interfaccia
+
+      // Il metodo factory Stream.toArray (per esempio) costruisce 
+      // un array, ma ha bisogno di sapere esattamente di che tipo,
+      // in quel caso un riferimento del genere sarebbe comodo...
+
+
+
+
+>> ITERAZIONE INTERNA
+
+    Invece di usare for/while che comanda come iterare su una struttura dati,
+    si chiede alla struttura di ripetere su se stessa una operazione ricevuta come lambda.
+
+    forEach( *esegui questo metodo per ognuno* )   (per le collection)
+
+    --esempi:
+        1) CICLO CLASSICO
+          for(Persona p : persone)
+	     System.out.println(p);
+
+        2) ITERAZIONE INTERNA
+          persone.forEach( p -> System.out.println(p) );
+
+        3) ITERAZIONE INTERNA (CON METHOD INTERFACE)
+          persone.forEach( System.out.println );
+
+      // Per usarlo con gli array dovrò fare
+      // Arrays.asList(*array*).forEach(...);
+
+
+
+
+
+>> COMPOSIZIONE DI FUNZIONI
+
+    - f.andThen(g)    // definisce la funzione «sequenza» g(f(…))
+    - f.compose(g)    // definisce la funzione «composta» f(g(…))
+
+
+    --esempio:
+      IntUnaryOperator mulBy3 = x -> x * 3;
+      IntUnaryOperator incBy1 = x -> x + 1;
+      
+      var y = mulBy3.andThen(incBy1).applyAsInt(4); // dà (3x4)+1 = 13
+      var z = mulBy3.compose(incBy1).applyAsInt(4); // dà 3x(4+1) = 15
+
+
+
+>> ITERAZIONI COMPOSTE (ITER. INTERNA + COMP FUNZIONI)
+
+    elencoPersone.forEach(  itself(Persona::printIfMature).andThen(Persona::printIfYoung));  );
+
+    // - itself accede alla persona attuale
+    // - si stampa se è matura o no
+    // - e poi si stampa se è giovane o no
+
+
+
+
+
+
+
+
+
+
+
+

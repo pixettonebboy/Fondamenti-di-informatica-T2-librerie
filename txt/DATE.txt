@@ -1,0 +1,24 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+-----------------------------------------------------------------DATE E TEMPI-------------------------------
+
+|CREAZIONE DATA o TEMPO:|
+LocalDate data = LocalDate.of(2020, 12, 25);
+LocalTime now = LocalTime.now();
+DayOfWeek d = DayOfWeek.of(1); //ottieni l'enumerativo MONDAY
+
+
+(OffsetDateTime è una data assoluta espressa come data + orario + delta rispetto a Greenwich)
+(ZonedDateTime orario + fuso)
+
+es. LocalDateTime -> 2017-12-03T10:15:30
+
+|CALCOLI E CAMBIAMENTO DI DATE|:
+LocalDate xmas2016 = data.withYear(2016);
+LocalDate 26dec = data.plusDays(1);
+
+|DURATION e PERIOD|:
+Duration d = Duration.between(inizio, fine); // es. PT1464H
+
+Period p = Period.between(today, nextBirthDay); es. P1M30D

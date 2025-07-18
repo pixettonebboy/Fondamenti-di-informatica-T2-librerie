@@ -1,0 +1,165 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    - class Locale  >> "Cultura Locale" composta da lingua e paese
+    
+    - Se non specificata, i formattatori adottano Locale.getDefault();    // Default del dispositivo in uso
+    
+    - Anche loro solo istanze con le factory
+
+    - Due tipi principali:
+
+
+
+
+
+>> FORMATTATORI NUMERICI   (NumberFormat   >>>   Numeri, percentuali, prezzi, valute)   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    1) Prima di tutto genero il NumberFormat che mi interessa:
+    
+    - NumberFormat.getNumberInstance();
+    - NumberFormat.getPercentInstance();
+    - NumberFormat.getCurrencyInstance();
+
+    2) Poi lo configuro in base alle mie esigenze:
+    --esempio:
+	NumberFormat fN = NumberFormat.getNumberInstance();
+	fN.setMaximumFractionDigits(2);
+
+    3) Con il metodo .format posso formattare un mio dato (es double)
+    --esempio:
+	fN.format(25.005345);
+
+    TUTTO CIO' CON IL Locale.ITALY PRESO DAL DEFAULT (Virgola per i decimali etc.)!
+
+
+
+>> CAMBIO DI LOCALITA'
+
+    --esempio:
+    NumberFormat.getNumberInstance(Locale.CANADA);
+
+
+
+
+
+
+Analogo anche per...
+
+>> FORMATTATORI PER DATE E ORARI   (DateTimeFormatter   >>>  Date, orari, date con orari tutti con lunghezza custom)  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	Al formattatore va specificata la lunghezza della stringa di data:
+
+	  - FormatStyle.SHORT     gg/mm/aa              // 18/03/15
+	  - FormatStyle.MEDIUM    gg/sigla/aa           // 18 mar 2015
+	  - FormatStyle.LONG      gg/mese/aaaa          // 18 marzo 2015
+	  - FormatStyle.FILL      giorno/gg/mese/aaaa   // mercoledì 18 marzo 2015
+
+
+	--esempio:
+	DateTimeFormatter form = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+	LocalDate d = LocalDate.now();
+        System.out.println( d.format(form) );
+	  
+
+
+>> PATTERN PERSONALIZZATI  (ofPattern)
+
+    DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+
+
+>> LOCALIZZAZZIONE
+
+    Non c'è nella factory, va applicata dopo o con una fluent interface:
+	
+    --esempio:
+        DateTimeFormatter.ofLocalizedDate(...).withLocale(Locale.CANADA);
+
+
+
+>> TEMPO LOCALIZZATO
+
+    Analogo per un tempo ma si accettano solo due formati:
+
+	- FormatStyle.SHORT     hh:mm      // 18:37
+	- FormatStyle.MEDIUM    hh:mm:ss   // 18:37:24
+
+
+    --esempio:
+    DateTimeFormatter form = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
+    LocalTime t = LocalTime.now();
+    System.out.println( t.format(form) );
+
+
+
+>> FORMATTATORE PER DATETIME (DateTimeFormatter)
+
+    DateTimeFormatter form = DateTimeFormatter.ofLocalizedDateTime( (FormatStyle)stileData, (FormatStyle)stileTempo);
+
+
+e i formattatori valgono anche per i valori assoluti (es. date con greewitch)
+
+
+
+
+
+
+>>> FORMATTATORI PERSONALIZZATI (Format) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    --esempio:
+        String pattern = "¤ #,##0.##";
+	DecimalFormat formatter = new DecimalFormat(pattern);
+	formatter.format(12345678.91234)    // € 12.345.678,91
+
+	Qui si specifica: 
+	   - Una cifra numerica dove si ha l'#
+	   - Il simbolo di valuta dove si ha ¤
+	   - Uno spazio tra la valuta e il numero
+           - L'uso di due cifre decimali
+	   - Un separatore delle migliaia ogni 3 cifre
+	   - Uno zero davanti i numero con parte intera nulla
+
+
+
+    Si possono mettere doppie specifiche:
+
+    -esempio (Dividere formattazione di numeri positivi e negativi):
+	
+         var f = new DecimalFormat("¤ #,##0.##;¤ -#,##0.##");
+
+
+
+
+	
+>> PARSING DI NUMERI DATE E ORARI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+    ATTENZIONE: CIRCONDARE CON TRY/CATCH!
+
+
+    --esempio:
+    NumberFormat fV = NumberFormat.getCurrencyInstance(Locale.US);
+    Number num = fV.parse("$123.56");    // restituisce un number che potrà poi essere convertito in float, int o double
+    System.out.println(num);
+
+
+    --esempio:
+    DateTimeFormatter fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(Locale.ITALY);
+    TemporalAccessor t = fmt.parse("12/02/23, 12:40");      // restituisce un temporal accessor da convertire esplicitamente poi in un tempo
+    LocalDate d = LocalDate.from(t);
+
+
+    --esempio:
+    DateTimeFormatter fmt = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.SHORT).withLocale(Locale.ITALY);
+    TemporalAccessor tp = fmt.parse("12/02/23, 12:40")
+
+    // Posso estrarre a piacimento data oppure ora!
+    LocalDate d = LocalDate.from(t);      // 2023-02-12
+    LocalTime t = LocalDate.from(tp);     // 12:40
+
+
+

@@ -1,0 +1,34 @@
+>>>>>>>>>>> JAVA UNIBO 2022/2023 <<<<<<<<<<<<<<
+>>>>>>>>>> Corso di  Enrico Denti <<<<<<<<<<<<<
+>>>>>>>> Appunti di Filippo Giulietti <<<<<<<<<
+
+
+
+    Rappresentano classi concettuali, che non avrebbe senso rendere Oggetto
+    fungono quindi da raggruppatori.
+
+    Lascerò indefiniti alcuni metodi, e potrò istanziare una classe che eredita la classe astratta
+    solo se concretizza TUTTI i concetti astratti che mi sono posto.
+
+    --esempio:
+
+      public abstract class Animale {
+          public abstract String siMuove();
+          public abstract String vive();
+      }
+
+      public abstract class Uccello extends Animale {        // Ancora astratta perchè manca "siMuove()"
+          @Override
+          public String siMuove(){   return "volando";   }
+	  public abstract String vive();
+      }
+
+      public class Piccione extends Uccello {        // Sfruttabile come oggetto, ha tutto
+
+          (Costruttore e altri metodi...)
+
+	  // Tutti i piccioni avranno già siMuove(), definito su Uccello
+
+          @Override
+	  public String vive(){   return "sulla terraferma e in aria";   }
+      }
