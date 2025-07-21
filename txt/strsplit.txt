@@ -1,0 +1,87 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+🧾 Formulario – String.split(regex) in Java
+
+split PERSISTENZA:
+
+String[] items = riga.split("\t+|:");
+usa una regex che dice:
+
+\t+ → uno o più caratteri TAB
+
+| → oppure
+
+: → il carattere due punti
+
++ = uno o piu;
+* = 0 o piu
+
+📌 Base
+java
+Copia codice
+String[] parts = str.split("regex");
+🧠 Attenzione:
+Il parametro è una regex, non una semplice stringa.
+
+Per dividere su simboli speciali (., |, *, +, ecc.), vanno "escapati" con \\.
+
+🔣 Regex più comuni
+Simbolo	Cosa fa	Esempio split su...	Regex da usare
+" "	Spazio singolo	parole separate da spazi	" "
+"\s"	Qualsiasi spazio (tab, ecc.)	separa su qualsiasi spazio	"\\s"
+"\s+"	Uno o più spazi	evita array con elementi vuoti	"\\s+"
+"\t"	TAB	separa su TAB	"\\t"
+"\t+"	Uno o più TAB	utile quando ci sono più TAB	"\\t+"
+":"	Due punti	separa su ":"	":"
+","	Virgola	separa su ","	","
+"\\."	Punto	separa su "." (deve essere escapato)	"\\."
+";"	Punto e virgola	separa su ";"	";"
+`"\	"`	Pipe (barra verticale)	separa su "
+"\\d"	Cifra	separa in corrispondenza di cifre	"\\d"
+
+🔁 Combinazioni con OR (|)
+Obiettivo	Regex	Esempio
+Spazio o TAB	"\\s"	"ciao\tcome stai" → ["ciao", "come", "stai"]
+Più TAB o due punti	`"\t+	:"`
+TAB o spazio o due punti	`"\t+	\s+
+
+🧼 Pulizia dopo lo split
+java
+Copia codice
+String[] items = str.split("regex");
+
+// Rimuove spazi in eccesso da ogni elemento
+for (int i = 0; i < items.length; i++) {
+    items[i] = items[i].trim();
+}
+Oppure:
+
+java
+Copia codice
+items = Arrays.stream(items)
+             .map(String::trim)
+             .toArray(String[]::new);
+✍️ Esempi pratici
+1. Split su TAB o :
+java
+Copia codice
+String[] items = riga.split("\\t+|:");
+
+2. Split su TAB, spazio o :
+java
+Copia codice
+String[] items = riga.split("\\t+|\\s+|:");
+
+3. Split su virgole con spazi
+java
+Copia codice
+String[] items = riga.split(",\\s*");
+❗️ Attenzione ai caratteri speciali
+Carattere	Regex da usare
+.	"\\."
+`	`
++	"\\+"
+*	"\\*"
+[	"\\["
+(	"\\("

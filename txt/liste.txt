@@ -1,0 +1,78 @@
+📘 LISTE IN JAVA – FORMULARIO COMPLETO
+
+dichiarazione:
+
+List<String> lista = new ArrayList<>();      // Lista dinamica
+
+
+
+
+Metodi principali (ArrayList / List):
+
+| Metodo                      | Descrizione                                 |
+| --------------------------- | ------------------------------------------- |
+| `add(E e)`                  | Aggiunge in fondo                           |
+| `add(int index, E e)`       | Inserisce in posizione specifica            |
+| `get(int index)`            | Restituisce l'elemento in posizione `index` |
+| `set(int index, E e)`       | Sostituisce elemento in `index`             |
+| `remove(int index)`         | Rimuove per indice                          |
+| `remove(Object o)`          | Rimuove la prima occorrenza                 |
+| `clear()`                   | Svuota la lista                             |
+| `size()`                    | Ritorna il numero di elementi               |
+| `isEmpty()`                 | Ritorna `true` se vuota                     |
+| `contains(Object o)`        | `true` se contiene quell’elemento           |
+| `indexOf(Object o)`         | Primo indice di `o`, -1 se non c'è          |
+| `lastIndexOf(Object o)`     | Ultimo indice di `o`                        |
+| `subList(int from, int to)` | Sottolista da `from` a `to-1`               |
+| `toArray()`                 | Converte in array                           |
+| `equals(Object o)`          | Confronta due liste                         |
+
+
+
+
+Iterazione (ciclo)
+✅ For-each:
+java
+Copia
+Modifica
+for (String s : lista) {
+    System.out.println(s);
+}
+✅ For con indice:
+java
+Copia
+Modifica
+for (int i = 0; i < lista.size(); i++) {
+    System.out.println(lista.get(i));
+}
+✅ Con Iterator:
+java
+Copia
+Modifica
+Iterator<String> it = lista.iterator();
+while (it.hasNext()) {
+    System.out.println(it.next());
+}
+✅ Con forEach (Java 8+):
+java
+Copia
+Modifica
+lista.forEach(System.out::println);
+
+
+CONVERSIONI UTILI:
+
+| Da → A           | Codice                                   |
+| ---------------- | ---------------------------------------- |
+| `List` → `Array` | `lista.toArray(new String[0])`           |
+| `Array` → `List` | `List<String> l = Arrays.asList(array);` |
+| `List` → `Set`   | `Set<T> s = new HashSet<>(lista);`       |
+
+
+
+
+ORDINAMENTO:
+
+import java.util.Collections;
+
+Collections.sort(lista); // Ordina alfabeticamente (per stringhe o comparabili)

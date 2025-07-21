@@ -1,0 +1,102 @@
+Librerie Di Fondamenti i Informatica T-2
+Achille Pisani
+
+
+| Tipo                | Ordinamento | Note                                                     |
+| ------------------- | ----------- | -------------------------------------------------------- |
+| `HashMap`           | ❌           | Accesso veloce, nessun ordine garantito                  |
+| `TreeMap`           | ✅           | Ordinamento naturale della chiave o tramite `Comparator` |
+| `LinkedHashMap`     | ✅           | Mantiene l’**ordine di inserimento**                     |
+| `ConcurrentHashMap` | ❌           | Versione thread-safe per uso concorrente                 |
+
+
+
+
+| Metodo                                | Descrizione                                         |
+| ------------------------------------- | --------------------------------------------------- |
+| `V put(K key, V value)`               | Inserisce o aggiorna un valore                      |
+| `V get(Object key)`                   | Restituisce il valore associato alla chiave         | --> null se non ce chiave
+| `boolean containsKey(Object key)`     | Controlla se esiste la chiave                       |
+| `boolean containsValue(Object value)` | Controlla se esiste il valore                       |
+| `V remove(Object key)`                | Rimuove la chiave e restituisce il valore associato |
+| `int size()`                          | Numero di coppie chiave-valore                      |
+| `boolean isEmpty()`                   | Verifica se la mappa è vuota                        |
+| `void clear()`                        | Rimuove tutti gli elementi                          |
+| `Set<K> keySet()`                     | Restituisce un insieme delle chiavi                 |
+| `Collection<V> values()`              | Restituisce una collezione dei valori               |
+| `Set<Map.Entry<K,V>> entrySet()`      | Restituisce un set di entry (coppie chiave-valore)  |
+
+
+
+🔁 Iterazioni comuni
+
+1. Su tutte le chiavi ( keySet() ):  
+
+/*La funzione keySet() di una mappa in Java restituisce un insieme (Set) contenente tutte le chiavi presenti nella mappa. 
+(in caso chiavi Integer) for(Integer k : map.keySet()) scorre tutte le chiavi della mappa*/
+
+for (K key : map.keySet()) {
+    V value = map.get(key);
+    System.out.println(key + " => " + value);
+}
+
+
+2. Su tutte le entry ( entrySet() ):
+
+for (Map.Entry<K, V> entry : map.entrySet()) {
+    System.out.println(entry.getKey() + " => " + entry.getValue());
+}
+
+
+3. Su tutti i valori (values()):
+
+for (V value : map.values()) {
+    System.out.println(value);
+}
+
+
+METODI AVANZATI:
+
+| Metodo                                                       | Descrizione                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------- |
+| `forEach(BiConsumer<K,V> action)`                            | Iterazione funzionale                                         |
+| `getOrDefault(K key, V defaultValue)`                        | Ritorna valore o default                                      |
+| `putIfAbsent(K key, V value)`                                | Inserisce **solo se la chiave non esiste**                    |
+| `replace(K key, V value)`                                    | Sostituisce il valore se la chiave esiste                     |
+| `replaceAll(BiFunction<K,V,V> function)`                     | Sostituisce tutti i valori applicando una funzione            |
+| `compute(K key, BiFunction<K,V,V> remappingFunction)`        | Ricostruisce il valore a partire da chiave e valore esistenti |
+| `merge(K key, V value, BiFunction<V,V,V> remappingFunction)` | Combina un valore esistente con un nuovo valore               |
+
+
+
+Ordinamento con TreeMap:
+
+TreeMap<String, Integer> sortedMap = new TreeMap<>();
+sortedMap.put("B", 2);
+sortedMap.put("A", 1);
+sortedMap.put("C", 3);
+// Ordinato in base all’ordine alfabetico delle chiavi
+
+
+Copia o duplicazione:
+
+Map<K, V> copy = new HashMap<>(original);
+
+Confronto tra mappe:
+
+map1.equals(map2) // confronta chiavi e valori
+
+
+ Esempio completo:
+
+Map<String, Integer> mappa = new HashMap<>();
+mappa.put("Mario", 10);
+mappa.put("Luigi", 12);
+mappa.put("Peach", 8);
+
+// Iterazione con entrySet
+for (Map.Entry<String, Integer> entry : mappa.entrySet()) {
+    System.out.println(entry.getKey() + " ha punteggio " + entry.getValue());
+}
+
+

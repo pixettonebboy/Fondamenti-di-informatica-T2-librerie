@@ -1,0 +1,77 @@
+SortedSet in Java – Formularo completo
+🔹 1. Cos'è SortedSet
+È un'interfaccia che estende Set e mantiene gli elementi in ordine naturale (es. alfabetico o numerico).
+
+La sua implementazione principale è TreeSet.
+
+java
+Copia
+Modifica
+import java.util.SortedSet;
+import java.util.TreeSet;
+java
+Copia
+Modifica
+SortedSet<String> set = new TreeSet<>();
+🔹 2. Caratteristiche principali
+Caratteristica	Dettagli
+Ordinamento	Automatico, per ordine naturale o comparatore
+Unicità	Non permette duplicati
+Null	❌ Non ammessi se ordinamento naturale
+Tempo di accesso	Basato su alberi bilanciati (O(log n))
+
+🔹 3. Metodi principali (SortedSet)
+Metodo	Descrizione
+add(E e)	Aggiunge un elemento
+remove(Object o)	Rimuove un elemento
+contains(Object o)	Verifica se è presente
+first()	Restituisce il primo elemento
+last()	Restituisce l'ultimo elemento
+headSet(E to)	Elementi minori di to
+tailSet(E from)	Elementi maggiori o uguali a from
+subSet(E from, E to)	Elementi tra from (incluso) e to (escluso)
+size()	Numero di elementi
+isEmpty()	Verifica se è vuoto
+clear()	Svuota il set
+
+🔹 4. Esempio base
+java
+Copia
+Modifica
+SortedSet<Integer> numeri = new TreeSet<>();
+
+numeri.add(5);
+numeri.add(2);
+numeri.add(9);
+
+System.out.println(numeri);         // [2, 5, 9]
+System.out.println(numeri.first()); // 2
+System.out.println(numeri.last());  // 9
+🔹 5. Ordinamento personalizzato (con Comparator)
+java
+Copia
+Modifica
+SortedSet<String> nomi = new TreeSet<>((a, b) -> b.compareTo(a)); // Ordine inverso
+
+nomi.add("Alice");
+nomi.add("Bob");
+
+System.out.println(nomi); // [Bob, Alice]
+🔹 6. Iterazione
+java
+Copia
+Modifica
+for (String s : set) {
+    System.out.println(s);
+}
+oppure con lambda:
+
+java
+Copia
+Modifica
+set.forEach(System.out::println);
+🔹 7. Differenze HashSet vs TreeSet vs LinkedHashSet
+Caratteristica	HashSet	TreeSet (SortedSet)	LinkedHashSet
+Ordinamento	❌ Nessuno	✅ Ordinato	✅ Ordine inserimento
+Prestazioni	✅ Veloci	⚠️ Più lente	✅ Buone
+Duplicati	❌ No	❌ No	❌ No
